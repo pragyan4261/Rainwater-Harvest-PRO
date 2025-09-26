@@ -777,7 +777,7 @@ useEffect(() => {
       </div>
       <div>
         <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Weather Statistics</h2>
-        <Card className="h-80 sm:h-90 p-4 sm:p-5 md:p-6">
+        <Card className="h-90 sm:h-90 p-4 sm:p-5 md:p-6">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h3 className="font-medium text-base sm:text-lg">Weekly Summary</h3>
             <CloudRainIcon className="text-blue-600 w-5 h-5 sm:w-6 sm:h-6" />
