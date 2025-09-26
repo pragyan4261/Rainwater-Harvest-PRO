@@ -20,6 +20,16 @@ const MapExplorer: React.FC = () => {
   const [measurePoints, setMeasurePoints] = useState<L.LatLng[]>([]);
   const [totalDistance, setTotalDistance] = useState(0); // meters
 
+  // Precipitation heatmap state
+  const [showPrecipitationHeatmap, setShowPrecipitationHeatmap] = useState(false);
+  const [precipitationOpacity, setPrecipitationOpacity] = useState(0.8);
+  const precipitationLayerRef = useRef<L.TileLayer | null>(null);
+
+  // Tomorrow.io API configuration
+  const TOMORROW_API_KEY = 'BTEvHO0kVYUl4eNcrogWQnwFsEon7S1a';
+  const DATA_FIELD = 'precipitationIntensity';
+  const TIMESTAMP = (new Date()).toISOString();
+
   // Refs to Leaflet objects for cleanup
   const measureMarkersRef = useRef<L.Marker[]>([]);
   const measureLineRef = useRef<L.Polyline | null>(null);
@@ -47,6 +57,67 @@ const MapExplorer: React.FC = () => {
 
   const finishMeasurement = () => {
     setIsMeasuring(false);
+  };
+
+  // Toggle precipitation heatmap
+  const togglePrecipitationHeatmap = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (showPrecipitationHeatmap) {
+      // Remove precipitation layer
+      if (precipitationLayerRef.current) {
+        map.removeLayer(precipitationLayerRef.current);
+        precipitationLayerRef.current = null;
+      }
+      setShowPrecipitationHeatmap(false);
+    } else {
+      // Add precipitation layer with enhanced visibility
+      const precipitationLayer = L.tileLayer(
+        `https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/${DATA_FIELD}/${TIMESTAMP}.png?apikey=${TOMORROW_API_KEY}`,
+        {
+          attribution: '&copy; <a href="https://www.tomorrow.io/weather-api">Tomorrow.io Weather API</a>',
+          opacity: precipitationOpacity, // Use dynamic opacity
+          zIndex: 1000,
+          className: 'precipitation-layer' // Custom class for styling
+        }
+      );
+      precipitationLayer.addTo(map);
+      precipitationLayerRef.current = precipitationLayer;
+      setShowPrecipitationHeatmap(true);
+    }
+  };
+
+  // Handle opacity change for precipitation layer
+  const handleOpacityChange = (newOpacity: number) => {
+    setPrecipitationOpacity(newOpacity);
+    if (precipitationLayerRef.current) {
+      precipitationLayerRef.current.setOpacity(newOpacity);
+    }
+  };
+
+  // Refresh precipitation data with current timestamp
+  const refreshPrecipitationData = () => {
+    if (!showPrecipitationHeatmap || !mapRef.current) return;
+    
+    // Remove current layer
+    if (precipitationLayerRef.current) {
+      mapRef.current.removeLayer(precipitationLayerRef.current);
+    }
+    
+    // Add new layer with updated timestamp
+    const newTimestamp = new Date().toISOString();
+    const precipitationLayer = L.tileLayer(
+      `https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/${DATA_FIELD}/${newTimestamp}.png?apikey=${TOMORROW_API_KEY}`,
+      {
+        attribution: '&copy; <a href="https://www.tomorrow.io/weather-api">Tomorrow.io Weather API</a>',
+        opacity: precipitationOpacity,
+        zIndex: 1000,
+        className: 'precipitation-layer'
+      }
+    );
+    precipitationLayer.addTo(mapRef.current);
+    precipitationLayerRef.current = precipitationLayer;
   };
 
   // Recalculate distance whenever points change
@@ -149,6 +220,63 @@ const MapExplorer: React.FC = () => {
             {measurePoints.length > 1 && isMeasuring && (
               <div className="text-[10px] text-gray-500">(Click Finish to lock)</div>
             )}
+            {/* Precipitation Heatmap Toggle */}
+            <div className="mt-2 border-t border-gray-300 pt-2">
+              <button
+                onClick={togglePrecipitationHeatmap}
+                className={`w-full px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
+                  showPrecipitationHeatmap 
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md hover:from-blue-600 hover:to-blue-700' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${showPrecipitationHeatmap ? 'bg-white' : 'bg-blue-500'}`}></span>
+                {showPrecipitationHeatmap ? '🌧️ Hide Rain Data' : '🌦️ Show Rain Data'}
+              </button>
+              {showPrecipitationHeatmap && (
+                <div className="mt-2 p-2 bg-white/95 rounded border text-[10px]">
+                  <div className="font-medium text-gray-800 mb-1">Precipitation Intensity</div>
+                  <div className="flex items-center justify-between text-gray-600 mb-2">
+                    <span>Light</span>
+                    <div className="flex-1 mx-2 h-2 rounded bg-gradient-to-r from-transparent via-blue-300 to-blue-600"></div>
+                    <span>Heavy</span>
+                  </div>
+                  
+                  {/* Opacity Control */}
+                  <div className="mt-2 border-t border-gray-200 pt-2">
+                    <div className="flex items-center justify-between text-gray-600 mb-1">
+                      <label htmlFor="precipitation-opacity" className="text-[10px]">Transparency</label>
+                      <span className="text-blue-600 font-medium">{Math.round(precipitationOpacity * 100)}%</span>
+                    </div>
+                    <input
+                      id="precipitation-opacity"
+                      type="range"
+                      min="0.2"
+                      max="1"
+                      step="0.1"
+                      value={precipitationOpacity}
+                      onChange={(e) => handleOpacityChange(parseFloat(e.target.value))}
+                      className="w-full precipitation-opacity-slider"
+                      title="Adjust precipitation layer transparency"
+                    />
+                  </div>
+                  
+                  <div className="text-center text-gray-500 mt-1 flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
+                      <span>Live weather data</span>
+                    </div>
+                    <button
+                      onClick={refreshPrecipitationData}
+                      className="text-blue-600 hover:text-blue-700 text-[10px] underline"
+                      title="Refresh precipitation data"
+                    >
+                      🔄 Refresh
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <LayersControl position="topright">
             <BaseLayer checked name="Default View">
