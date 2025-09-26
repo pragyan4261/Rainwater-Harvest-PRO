@@ -358,7 +358,6 @@ i18n.use(initReactI18next).init({
                 "Get reminders for maintaining your rainwater harvesting systems":
                     "Get reminders for maintaining your rainwater harvesting systems",
                 "Notification Channels": "Notification Channels",
-                Email: "Email",
                 SMS: "SMS",
                 "Push Notifications": "Push Notifications",
 
@@ -696,7 +695,6 @@ i18n.use(initReactI18next).init({
                 "Get reminders for maintaining your rainwater harvesting systems":
                     "अपने वर्षा जल संचयन प्रणाली के रखरखाव के लिए अनुस्मारक प्राप्त करें",
                 "Notification Channels": "सूचना चैनल",
-                Email: "ईमेल",
                 SMS: "एसएमएस",
                 "Push Notifications": "पुश सूचनाएँ",
 
