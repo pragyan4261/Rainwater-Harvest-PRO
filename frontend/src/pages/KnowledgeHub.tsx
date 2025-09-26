@@ -36,7 +36,7 @@ const KnowledgeHub: React.FC = () => {
       type: 'article',
       category: 'basics',
       thumbnail:
-        'https://images.unsplash.com/photo-1525939864518-b53937989bbd?auto=format&fit=crop&w=500&q=60',
+        'https://www.freshwatersystems.com/cdn/shop/articles/Rainwater_Harvesting_2.jpg?v=1624377712&width=500',
       featured: true,
       link: 'https://savetherivers.in/rainwater-harvesting/'
     },
@@ -46,7 +46,7 @@ const KnowledgeHub: React.FC = () => {
       type: 'video',
       category: 'techniques',
       thumbnail:
-        'https://images.unsplash.com/photo-1594642441838-7d17b2e0e103?auto=format&fit=crop&w=500&q=60',
+        'https://www.starkefiltermedia.com/wp-content/uploads/2025/05/Rain-Water-Harvesting-1200x700.jpg.webp',
       duration: '12:45',
       link: 'https://m.youtube.com/watch?v=FAKCczVl5ls'
     },
@@ -56,7 +56,7 @@ const KnowledgeHub: React.FC = () => {
       type: 'guide',
       category: 'maintenance',
       thumbnail:
-        'https://images.unsplash.com/photo-1607175589090-c188838b9d35?auto=format&fit=crop&w=500&q=60',
+        'https://yenaengineering.nl/wp-content/uploads/2020/01/Ekran-Resmi-2023-01-30-22.14.25.png',
       link: 'https://www.petrosync.com/blog/storage-tank-maintenance/'
     },
     {
@@ -74,7 +74,7 @@ const KnowledgeHub: React.FC = () => {
       type: 'article',
       category: 'case-studies',
       thumbnail:
-        'https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?auto=format&fit=crop&w=500&q=60',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmMUUCShe2wQklMSkAiLkeOMev_SVpSSUlKw&s',
       link: 'https://neer.co.in/rainwater-harvesting-success-stories-from-around-the-globe/'
     },
     {
@@ -83,7 +83,7 @@ const KnowledgeHub: React.FC = () => {
       type: 'video',
       category: 'techniques',
       thumbnail:
-        'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=500&q=60',
+        'https://fluidhandlingpro.com/wp-content/uploads/2023/04/Industrial-fluid-filtration-systems-Innovations-News-Fluid-Handling-Pro.jpeg',
       duration: '08:32',
       link: 'https://youtu.be/JPZHTBHOUz4?si=kCeIJtk8YDwfiefu'
     }
