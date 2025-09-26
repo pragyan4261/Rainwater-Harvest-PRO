@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pandas
+scikit-learn
+numpy
+matplotlib
+joblib
+python-dateutil
+pytz
+pydantic
+httpx
