@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserIcon, BellIcon, GlobeIcon, MoonIcon, ShieldIcon, HelpCircleIcon } from 'lucide-react';
+import { UserIcon, BellIcon, GlobeIcon, MoonIcon, ShieldIcon, HelpCircleIcon, MailIcon, MessageSquareIcon, InfoIcon } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -45,6 +45,10 @@ const Settings: React.FC = () => {
     id: 'help',
     name: t("settings.help"),
     icon: <HelpCircleIcon size={18} />
+  }, {
+    id: 'about',
+    name: "About",
+    icon: <InfoIcon size={18} />
   }];
 
   return (
@@ -94,8 +98,8 @@ const Settings: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input label={t("settings.firstName")} value="Swarup" />
                 <Input label={t("settings.lastName")} value="Chanda" />
-                <Input label={t("settings.email")} type="email" value="swarupchanda1963@gmail.com" />
-                <Input label={t("settings.phoneNumber")} type="tel" value="+91 600 314 7277" />
+                <Input label={t("settings.email")} type="email" value="rainwise@gmail.com" />
+                <Input label={t("settings.phoneNumber")} type="tel" value="+91 XXX XXX 7277" />
               </div>
               <div className="mt-6">
                 <h3 className="font-medium mb-4">{t("settings.defaultAddress")}</h3>
@@ -335,6 +339,319 @@ const Settings: React.FC = () => {
 
               <div className="mt-6 flex justify-end">
                 <Button onClick={handleSave} variant="primary">{t("settings.savePreferences")}</Button>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === 'privacy' && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-6">{t("settings.privacy")}</h2>
+              
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Data Collection & Usage</h3>
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-gray-700 mb-3">
+                    We collect and use your data to provide personalized rainwater harvesting assessments and improve our services. 
+                    This includes location data, property information, and usage patterns.
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Allow data collection for personalized insights</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Location Services</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="font-medium text-sm">Precise Location</p>
+                      <p className="text-xs text-gray-600">Required for accurate rainfall calculations and assessments</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="font-medium text-sm">Background Location</p>
+                      <p className="text-xs text-gray-600">For weather alerts and maintenance reminders</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Data Sharing</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="font-medium text-sm">Anonymous Usage Analytics</p>
+                      <p className="text-xs text-gray-600">Help us improve the app with anonymized usage data</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="font-medium text-sm">Third-party Integrations</p>
+                      <p className="text-xs text-gray-600">Weather services and mapping providers</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Account Management</h3>
+                <div className="space-y-3">
+                  <Button variant="outline" size="sm">
+                    Download My Data
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Delete Account
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Account deletion will permanently remove all your data and cannot be undone.
+                </p>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <Button variant="primary">Save Privacy Settings</Button>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === 'help' && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-6">{t("settings.help")}</h2>
+              
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Frequently Asked Questions</h3>
+                <div className="space-y-4">
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-2">How do I start a rainwater harvesting assessment?</h4>
+                    <p className="text-sm text-gray-600">
+                      Go to the Assessment page from the main navigation. Enter your property details, 
+                      and our system will calculate your rainwater harvesting potential based on local rainfall data.
+                    </p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-2">What information do I need for an accurate assessment?</h4>
+                    <p className="text-sm text-gray-600">
+                      You'll need your property address, roof area (or we can calculate it), roof type, 
+                      and any existing water collection systems. The more details you provide, the more accurate your assessment will be.
+                    </p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-2">How accurate are the rainfall predictions?</h4>
+                    <p className="text-sm text-gray-600">
+                      Our predictions use historical weather data and real-time meteorological information. 
+                      Accuracy is typically 85-95% for monthly and seasonal forecasts.
+                    </p>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-2">Can I export my assessment results?</h4>
+                    <p className="text-sm text-gray-600">
+                      Yes! You can download your assessment as a PDF report from the Results page. 
+                      This includes all calculations, recommendations, and implementation guidelines.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Contact Support</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border border-gray-200 rounded-lg p-4 text-center">
+                    <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <MailIcon className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <h4 className="font-medium mb-1">Email Support</h4>
+                    <p className="text-sm text-gray-600 mb-3">Get help via email within 24 hours</p>
+                    <Button variant="outline" size="sm" fullWidth>
+                      Send Email
+                    </Button>
+                  </div>
+                  <div className="border border-gray-200 rounded-lg p-4 text-center">
+                    <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <MessageSquareIcon className="h-6 w-6 text-green-600" />
+                    </div>
+                    <h4 className="font-medium mb-1">Live Chat</h4>
+                    <p className="text-sm text-gray-600 mb-3">Chat with our support team</p>
+                    <Button variant="outline" size="sm" fullWidth>
+                      Start Chat
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-4">Resources</h3>
+                <div className="space-y-2">
+                  <Button variant="outline" fullWidth>
+                    📖 User Guide & Tutorials
+                  </Button>
+                  <Button variant="outline" fullWidth>
+                    🎥 Video Tutorials
+                  </Button>
+                  <Button variant="outline" fullWidth>
+                    📋 Installation Guidelines
+                  </Button>
+                  <Button variant="outline" fullWidth>
+                    🔧 Maintenance Best Practices
+                  </Button>
+                  <Button variant="outline" fullWidth>
+                    🌍 Community Forum
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h4 className="font-medium mb-2">Need More Help?</h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Our support team is available Monday-Friday, 9 AM - 6 PM EST. 
+                  For urgent technical issues, use the live chat feature.
+                </p>
+                <div className="flex space-x-2">
+                  <Button variant="primary" size="sm">
+                    Schedule Call
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Report Bug
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {activeTab === 'about' && (
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-6">About RainWise</h2>
+              
+              <div className="mb-6">
+                <div className="flex items-center mb-4">
+                  <div className="bg-blue-100 p-3 rounded-full mr-4">
+                    <div className="text-blue-600 text-2xl">💧</div>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">RainWise v2.1.0</h3>
+                    <p className="text-gray-600">Empowering Water Conservation Through Technology</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-3">Our Mission</h3>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  RainWise is dedicated to making rainwater harvesting accessible and efficient for everyone. 
+                  We combine advanced meteorological data, GIS mapping, and intelligent algorithms to provide 
+                  personalized assessments that help users maximize their water conservation potential.
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-3">Key Features</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex items-start space-x-2">
+                    <div className="text-green-600 mt-0.5">✓</div>
+                    <span className="text-sm text-gray-700">Personalized Rainwater Assessments</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="text-green-600 mt-0.5">✓</div>
+                    <span className="text-sm text-gray-700">Real-time Weather Integration</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="text-green-600 mt-0.5">✓</div>
+                    <span className="text-sm text-gray-700">Interactive Map Explorer</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="text-green-600 mt-0.5">✓</div>
+                    <span className="text-sm text-gray-700">Cost-Benefit Analysis</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="text-green-600 mt-0.5">✓</div>
+                    <span className="text-sm text-gray-700">Installation Guidelines</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <div className="text-green-600 mt-0.5">✓</div>
+                    <span className="text-sm text-gray-700">Maintenance Reminders</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-3">Our Impact</h3>
+                <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-blue-700">50K+</div>
+                      <div className="text-xs text-gray-600">Active Users</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-green-700">120M</div>
+                      <div className="text-xs text-gray-600">Liters Saved</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-cyan-700">15K+</div>
+                      <div className="text-xs text-gray-600">Systems Installed</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-3">Development Team</h3>
+                <div className="text-sm text-gray-600 space-y-2">
+                  <p><strong>Swarup Chanda</strong> - Lead Developer & Project Manager</p>
+                  <p><strong>Pragyan Das</strong> - Backend Developer & DevOps Handling</p>
+                  <p><strong>Environmental Engineering Team</strong> - Technical Advisors</p>
+                  <p><strong>NIT Silchar</strong> - Research & Development</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-medium mb-3">Contact & Support</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <MailIcon className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-700">rainwise@gmail.com</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 w-4 text-gray-500">📱</div>
+                    <span className="text-gray-700">+91 XXX XXX 7277</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 w-4 text-gray-500">🌐</div>
+                    <span className="text-gray-700">rainwise.app</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="h-4 w-4 text-gray-500">🏛️</div>
+                    <span className="text-gray-700">NIT Silchar, Assam</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 pt-4">
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>© 2024 RainWise. All rights reserved.</span>
+                  <span>Built with ❤️ for sustainable water management</span>
+                </div>
               </div>
             </Card>
           )}
