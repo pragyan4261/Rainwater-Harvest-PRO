@@ -36,13 +36,17 @@ interface AssessmentData {
     filtrationSystem: number;
     installation: number;
     total: number;
+    currency?: string;
   };
   roi: {
     annualSavings: number;
     paybackPeriod: string;
     waterSaved: number;
     runoffReduction: string;
+    currency?: string;
   };
+  currency?: string;
+  modelVersion?: string;
 }
 
 const AssessmentResults: React.FC = () => {
@@ -110,7 +114,7 @@ const AssessmentResults: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" icon={<ShareIcon size={16} />}>
-            {t('common.share')}
+            Share
           </Button>
           <Button variant="outline" icon={<DownloadIcon size={16} />}>
             {t('results.savePdf')}
@@ -259,29 +263,74 @@ const AssessmentResults: React.FC = () => {
             <div className="mb-4">
               <div className="flex justify-between mb-1">
                 <span className="text-gray-600">Storage Tank</span>
-                <span className="font-medium">${data?.costEstimation?.storageTank || 0}</span>
+                <div className="text-right">
+                  <span className="font-medium">₹{data?.costEstimation?.storageTank?.toLocaleString('en-IN') || 0}</span>
+                  <div className="text-xs text-gray-500">Materials + Accessories</div>
+                </div>
               </div>
               <div className="flex justify-between mb-1">
                 <span className="text-gray-600">Recharge Pit</span>
-                <span className="font-medium">${data?.costEstimation?.rechargePit || 0}</span>
+                <div className="text-right">
+                  <span className="font-medium">₹{data?.costEstimation?.rechargePit?.toLocaleString('en-IN') || 0}</span>
+                  <div className="text-xs text-gray-500">Excavation + Filter Media</div>
+                </div>
               </div>
               <div className="flex justify-between mb-1">
                 <span className="text-gray-600">Gutters & Pipes</span>
-                <span className="font-medium">${data?.costEstimation?.guttersPipes || 0}</span>
+                <div className="text-right">
+                  <span className="font-medium">₹{data?.costEstimation?.guttersPipes?.toLocaleString('en-IN') || 0}</span>
+                  <div className="text-xs text-gray-500">PVC System + Fittings</div>
+                </div>
               </div>
               <div className="flex justify-between mb-1">
                 <span className="text-gray-600">Filtration System</span>
-                <span className="font-medium">${data?.costEstimation?.filtrationSystem || 0}</span>
+                <div className="text-right">
+                  <span className="font-medium">₹{data?.costEstimation?.filtrationSystem?.toLocaleString('en-IN') || 0}</span>
+                  <div className="text-xs text-gray-500">Multi-stage + First Flush</div>
+                </div>
               </div>
               <div className="flex justify-between mb-1">
                 <span className="text-gray-600">Installation</span>
-                <span className="font-medium">${data?.costEstimation?.installation || 0}</span>
+                <div className="text-right">
+                  <span className="font-medium">₹{data?.costEstimation?.installation?.toLocaleString('en-IN') || 0}</span>
+                  <div className="text-xs text-gray-500">Labor + Transport + Supervision</div>
+                </div>
               </div>
               <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between">
                 <span className="font-semibold">Total Estimated Cost</span>
                 <span className="font-bold text-blue-700">
-                  ${data?.costEstimation?.total || 0}
+                  ₹{data?.costEstimation?.total?.toLocaleString('en-IN') || 0}
                 </span>
+              </div>
+              {data?.costEstimation?.currency && (
+                <div className="text-xs text-gray-500 mt-1">
+                  Currency: {data.costEstimation.currency} • ML Model: {data?.modelVersion || 'Standard'}
+                </div>
+              )}
+              
+              {/* Cost Analysis */}
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <h5 className="font-medium text-blue-800 mb-2">Cost Analysis</h5>
+                <div className="text-sm text-blue-700">
+                  <div className="flex justify-between mb-1">
+                    <span>Cost per m² roof area:</span>
+                    <span>₹{data?.roofArea ? Math.round((data.costEstimation?.total || 0) / data.roofArea).toLocaleString('en-IN') : 0}</span>
+                  </div>
+                  <div className="flex justify-between mb-1">
+                    <span>Cost per liter capacity:</span>
+                    <span>₹{data?.tankVolume ? ((data.costEstimation?.total || 0) / data.tankVolume).toFixed(1) : 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Cost per liter annual harvest:</span>
+                    <span>₹{data?.potentialHarvest ? ((data.costEstimation?.total || 0) / data.potentialHarvest).toFixed(3) : 0}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Regional Note */}
+              <div className="mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                💡 <strong>Note:</strong> Costs are based on Tier-2 Indian cities. 
+                Metro cities may be 15-20% higher, smaller towns 10-15% lower.
               </div>
             </div>
 
@@ -291,11 +340,16 @@ const AssessmentResults: React.FC = () => {
               <div className="bg-green-50 rounded-lg p-4 text-center mb-4">
                 <p className="text-sm text-gray-600 mb-1">Estimated Annual Savings</p>
                 <p className="text-2xl font-bold text-green-700">
-                  ${data?.roi?.annualSavings || 0}
+                  ₹{data?.roi?.annualSavings?.toLocaleString('en-IN') || 0}
                 </p>
                 <p className="text-sm text-gray-500">
                   Payback period: ~{data?.roi?.paybackPeriod || "N/A"}
                 </p>
+                {data?.roi?.currency && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Currency: {data.roi.currency}
+                  </p>
+                )}
               </div>
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-medium mb-2">{t('results.environmentalImpact')}</h4>

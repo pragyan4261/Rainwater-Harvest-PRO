@@ -1,18 +1,19 @@
-"""KMeans clustering on Bengaluru rainfall data.
+"""KMeans clustering on Bengaluru rainfall data with ML-based cost prediction.
 
 This script:
 1. Loads the rainfall dataset (yearly rows, monthly columns).
 2. Cleans empty unnamed column and converts values to numeric.
 3. Computes monthly means and total predicted annual rainfall.
-4. Estimates potential collection for a 30x40 ft site (approx 111.48 m^2 area).
+4. Estimates potential collection for a given roof area.
 5. Performs KMeans clustering on per-year monthly rainfall profile.
-6. Reduces dimensions with PCA for visualization.
-7. Saves cluster plot to 'rainfall_clusters.png'.
+6. Uses ML model trained on Indian construction data for cost estimation.
+7. Reduces dimensions with PCA for visualization.
+8. Saves cluster plot to 'rainfall_clusters.png'.
 
 Assumptions:
 - The last empty column in CSV is dropped.
-- Roof catchment area for 30x40 site assumed: 30 ft * 40 ft = 1200 sq ft = 111.48 m^2.
-- Collection efficiency assumed 0.8 (adjust as needed).
+- Collection efficiency varies by roof type.
+- ML model provides Indian cost estimates in INR.
 """
 
 from __future__ import annotations
@@ -32,6 +33,15 @@ from sklearn.pipeline import Pipeline
 # Add feature_format utilities path (per request)
 sys.path.append("E:/Downloads/ud120-projects-master/ud120-projects-master/tools/")
 from feature_format import featureFormat  # noqa: E402
+
+# Import the new cost prediction model
+try:
+    from cost_prediction_model import get_cost_predictor
+    ML_COST_MODEL_AVAILABLE = True
+    print("ML cost prediction model loaded successfully!")
+except ImportError as e:
+    ML_COST_MODEL_AVAILABLE = False
+    print(f"Warning: ML cost model not available: {e}")
 
 DATA_PATH = Path(__file__).parent.parent / "ml-service" / "Bengaluru Rainfall Data.csv"
 
@@ -112,6 +122,309 @@ def plot_clusters(X: np.ndarray, labels: np.ndarray, outfile: str = 'rainfall_cl
     plt.close()
 
 
+def calculate_feasibility(potential_harvest, roof_area, soil_type):
+    """
+    Determine project feasibility based on harvest potential and conditions.
+    """
+    if potential_harvest > 5000 and roof_area > 50:
+        feasibility = "Highly Feasible"
+        description = "Excellent conditions for rainwater harvesting with high potential returns."
+    elif potential_harvest > 2000 and roof_area > 25:
+        feasibility = "Feasible"
+        description = "Good conditions for rainwater harvesting with moderate returns."
+    elif potential_harvest > 1000:
+        feasibility = "Moderately Feasible"
+        description = "Basic rainwater harvesting is possible but returns may be limited."
+    else:
+        feasibility = "Low Feasibility"
+        description = "Limited potential due to small roof area or low rainfall."
+    
+    return feasibility, description
+
+
+def get_recommended_structures(roof_type, soil_type, roof_area):
+    """
+    Recommend appropriate structures based on conditions.
+    """
+    structures = []
+    
+    # Always recommend storage tank
+    structures.append({
+        "name": "Storage Tank",
+        "description": "Primary water storage system for collected rainwater."
+    })
+    
+    # Recharge structures based on soil type
+    if soil_type.lower() in ['sandy', 'loam']:
+        structures.append({
+            "name": "Recharge Pit",
+            "description": "Ground infiltration system suitable for your soil type."
+        })
+    elif soil_type.lower() == 'clay':
+        structures.append({
+            "name": "Recharge Well",
+            "description": "Deep infiltration system for clay soil conditions."
+        })
+    elif soil_type.lower() == 'rocky':
+        structures.append({
+            "name": "Recharge Shaft",
+            "description": "Specialized system for rocky terrain with proper filtration."
+        })
+    
+    # Roof-specific recommendations
+    if roof_type.lower() in ['rcc', 'concrete']:
+        structures.append({
+            "name": "First Flush Diverter",
+            "description": "Essential for concrete roofs to ensure water quality."
+        })
+    
+    if roof_area > 100:
+        structures.append({
+            "name": "Distribution System",
+            "description": "Multi-point collection system for large roof areas."
+        })
+    
+    return structures
+
+
+def estimate_groundwater_level(soil_type):
+    """
+    Estimate groundwater level based on soil type (simplified model).
+    """
+    levels = {
+        'sandy': 8.5,    # Shallow groundwater
+        'loam': 12.0,    # Moderate depth
+        'clay': 15.5,    # Deeper groundwater
+        'rocky': 18.0,   # Deepest groundwater
+    }
+    return levels.get(soil_type.lower(), 12.0)
+
+
+def get_monthly_rainfall_distribution():
+    """
+    Get typical monthly rainfall distribution for Bengaluru (example data).
+    Returns 12-month array in mm.
+    """
+    # Simplified Bengaluru rainfall pattern (mm per month)
+    # Peak during monsoon (June-September)
+    return [12, 8, 15, 45, 85, 165, 145, 135, 155, 95, 35, 18]
+
+
+def calculate_cost_estimation(tank_volume_l, roof_area, soil_type, potential_harvest):
+    """
+    Calculate cost estimation for rainwater harvesting system using ML model trained on Indian data.
+    Returns costs in Indian Rupees (INR).
+    """
+    if ML_COST_MODEL_AVAILABLE:
+        try:
+            # Use ML model for accurate cost prediction
+            predictor = get_cost_predictor()
+            
+            # Get roof type from context (default to RCC if not available)
+            roof_type = 'RCC'  # This should ideally be passed as parameter
+            
+            # Get ML-based cost estimation
+            ml_cost_estimate = predictor.estimate_rwh_system_cost(
+                roof_area_m2=roof_area,
+                roof_type=roof_type,
+                soil_type=soil_type,
+                tank_volume_l=tank_volume_l
+            )
+            
+            print(f"ML Model Cost Estimation (INR): ₹{ml_cost_estimate['total']:,.2f}")
+            
+            return {
+                'storage_tank': ml_cost_estimate['storage_tank'],
+                'recharge_pit': ml_cost_estimate['recharge_pit'],
+                'gutters_pipes': ml_cost_estimate['gutters_pipes'],
+                'filtration_system': ml_cost_estimate['filtration_system'],
+                'installation': ml_cost_estimate['installation'],
+                'total': ml_cost_estimate['total'],
+                'currency': 'INR',
+                'model_used': 'ML_trained'
+            }
+            
+        except Exception as e:
+            print(f"ML model failed, falling back to heuristic: {e}")
+            return calculate_cost_estimation_fallback(tank_volume_l, roof_area, soil_type, potential_harvest)
+    
+    else:
+        # Fallback to heuristic method
+        return calculate_cost_estimation_fallback(tank_volume_l, roof_area, soil_type, potential_harvest)
+
+
+def calculate_cost_estimation_fallback(tank_volume_l, roof_area, soil_type, potential_harvest):
+    """
+    Enhanced fallback cost estimation using detailed Indian market rates.
+    All costs in Indian Rupees (INR).
+    """
+    # ===== STORAGE TANK COSTS =====
+    # Tiered pricing based on tank size (Indian market rates)
+    if tank_volume_l <= 1000:
+        # Small plastic/fiberglass tanks
+        tank_cost_per_liter = 35  # ₹35/L
+        accessories_percentage = 0.12
+    elif tank_volume_l <= 5000:
+        # Medium reinforced plastic tanks
+        tank_cost_per_liter = 42  # ₹42/L
+        accessories_percentage = 0.15
+    elif tank_volume_l <= 15000:
+        # Large concrete/ferrocement tanks
+        tank_cost_per_liter = 48  # ₹48/L
+        accessories_percentage = 0.18
+    else:
+        # Very large RCC construction
+        tank_cost_per_liter = 55  # ₹55/L
+        accessories_percentage = 0.20
+    
+    tank_base_cost = tank_volume_l * tank_cost_per_liter
+    tank_accessories = tank_base_cost * accessories_percentage
+    storage_tank = tank_base_cost + tank_accessories
+    
+    # ===== RECHARGE PIT COSTS =====
+    base_pit_cost = 12000  # ₹12,000 for standard recharge pit
+    
+    # Soil type multipliers (Indian conditions)
+    soil_multipliers = {
+        'sandy': 1.0,     # Easy excavation, natural infiltration
+        'loam': 1.4,      # Moderate excavation + filter media
+        'clay': 1.8,      # Difficult excavation + drainage layers
+        'rocky': 2.5,     # Very difficult + specialized equipment
+    }
+    soil_multiplier = soil_multipliers.get(soil_type.lower(), 1.4)
+    
+    # Scale with roof area (larger catchment needs bigger pit)
+    area_scaling = min(roof_area / 100, 3.0)  # Max 3x scaling
+    
+    # Additional components for Indian recharge pits
+    excavation_cost = base_pit_cost * soil_multiplier * area_scaling
+    filter_media = 3000 * area_scaling  # Gravel, sand, charcoal layers
+    masonry_lining = 8000 * area_scaling  # Brick/stone lining
+    
+    recharge_pit = excavation_cost + filter_media + masonry_lining
+    
+    # ===== GUTTERS & PIPES COSTS =====
+    # Estimate based on roof perimeter and drainage requirements
+    estimated_perimeter = 4 * (roof_area ** 0.5)  # Rough square assumption
+    
+    # Indian PVC rates
+    gutter_cost_per_meter = 450  # ₹450/m for quality PVC gutters
+    pipe_cost_per_meter = 280    # ₹280/m for 4-6 inch pipes
+    
+    # Calculate requirements
+    gutter_length = estimated_perimeter
+    pipe_length = estimated_perimeter * 0.7  # Vertical + horizontal runs
+    
+    material_cost = (gutter_length * gutter_cost_per_meter + 
+                    pipe_length * pipe_cost_per_meter)
+    
+    # Fittings, joints, supports (25% of material cost)
+    fittings_cost = material_cost * 0.25
+    
+    gutters_pipes = material_cost + fittings_cost
+    
+    # ===== FILTRATION SYSTEM COSTS =====
+    # Multi-stage filtration for Indian conditions
+    basic_sand_filter = 8000    # ₹8,000 basic sand-gravel filter
+    first_flush_diverter = 3500 # ₹3,500 first flush system (essential)
+    
+    # Additional filtration based on tank size
+    if tank_volume_l > 5000:
+        advanced_filtration = 12000  # Multi-stage system
+        if tank_volume_l > 10000:
+            uv_treatment = 6000      # UV sterilization for large systems
+        else:
+            uv_treatment = 0
+    else:
+        advanced_filtration = 0
+        uv_treatment = 0
+    
+    filtration_system = (basic_sand_filter + first_flush_diverter + 
+                        advanced_filtration + uv_treatment)
+    
+    # ===== INSTALLATION COSTS =====
+    subtotal = storage_tank + recharge_pit + gutters_pipes + filtration_system
+    
+    # Installation complexity based on system size
+    if roof_area < 100:
+        installation_percentage = 0.16  # 16% for simple installations
+        complexity = "Simple"
+    elif roof_area < 300:
+        installation_percentage = 0.18  # 18% for medium complexity
+        complexity = "Medium"
+    else:
+        installation_percentage = 0.22  # 22% for complex installations
+        complexity = "Complex"
+    
+    # Additional Indian costs
+    transportation = subtotal * 0.03  # 3% for material transport
+    supervision = subtotal * 0.02     # 2% for technical supervision
+    
+    installation = (subtotal * installation_percentage) + transportation + supervision
+    
+    # Total cost
+    total = subtotal + installation
+    
+    return {
+        'storage_tank': round(storage_tank, 2),
+        'recharge_pit': round(recharge_pit, 2),
+        'gutters_pipes': round(gutters_pipes, 2),
+        'filtration_system': round(filtration_system, 2),
+        'installation': round(installation, 2),
+        'total': round(total, 2),
+        'currency': 'INR',
+        'model_used': 'enhanced_heuristic',
+        'breakdown': {
+            'tank_cost_per_liter': tank_cost_per_liter,
+            'soil_multiplier': soil_multiplier,
+            'installation_complexity': complexity,
+            'system_size': 'Small' if tank_volume_l <= 1000 else 
+                          'Medium' if tank_volume_l <= 5000 else
+                          'Large' if tank_volume_l <= 15000 else 'Very Large'
+        }
+    }
+
+
+def calculate_roi(potential_harvest, cost_estimation):
+    """
+    Calculate Return on Investment metrics for Indian market.
+    """
+    # Indian water pricing assumptions (in INR)
+    water_cost_per_liter = 0.05  # ₹0.05 per liter (Indian municipal water rates)
+    maintenance_cost_annual = 2000  # ₹2000 annual maintenance
+    
+    # Calculate annual savings
+    annual_water_savings = potential_harvest * water_cost_per_liter
+    net_annual_savings = annual_water_savings - maintenance_cost_annual
+    
+    # Payback period calculation
+    total_cost = cost_estimation.get('total', 0)
+    if net_annual_savings > 0 and total_cost > 0:
+        payback_years = total_cost / net_annual_savings
+        if payback_years < 1:
+            payback_period = f"{int(payback_years * 12)} months"
+        else:
+            payback_period = f"{payback_years:.1f} years"
+    else:
+        payback_period = "Not applicable"
+    
+    # Environmental impact
+    runoff_reduction = min(85, (potential_harvest / 10000) * 20)  # Percentage
+    
+    # Convert to display currency (show in INR for Indian market)
+    currency = cost_estimation.get('currency', 'INR')
+    
+    return {
+        'annual_savings': round(net_annual_savings, 2),
+        'payback_period': payback_period,
+        'water_saved': int(potential_harvest),
+        'runoff_reduction': f"{runoff_reduction:.1f}%",
+        'currency': currency,
+        'water_cost_per_liter': water_cost_per_liter,
+        'annual_water_bill_savings': round(annual_water_savings, 2)
+    }
+
+
 def predict_harvest(
     roof_area,
     roof_type,
@@ -122,9 +435,12 @@ def predict_harvest(
 ):
     """
     Calculate potential harvestable water (litres/year) and recommended tank volume (litres).
+    Now includes cost estimation and ROI calculations.
     """
-    # Normalize roof_type for mapping
+    # Normalize inputs
     roof_type = roof_type.strip().lower()
+    soil_type = soil_type.strip().lower()
+    
     # Coefficient mapping
     base_coeffs = {
         'rcc': 0.85,
@@ -138,6 +454,7 @@ def predict_harvest(
         'metal': 0.80,
     }
     coeff = base_coeffs.get(roof_type, 0.70)
+    
     # Adjust for slope: mild bonus up to +5% if slope between 5 and 25 degrees
     if 5 <= roof_slope <= 25:
         coeff *= 1.03
@@ -156,8 +473,7 @@ def predict_harvest(
     tank_volume_l = avg_monthly_collection * 1.5
 
     # Use the calculated catchment_eff as efficiency
-    efficiency = catchment_eff*100
-
+    efficiency = catchment_eff * 100
 
     # --- Get inertia from run_kmeans ---
     df = load_and_clean(DATA_PATH)
@@ -165,11 +481,61 @@ def predict_harvest(
     X = featureFormat(data_dict, month_cols, remove_NaN=True, remove_all_zeroes=False)
     pipeline, labels, inertia, elapsed = run_kmeans(X, k=3)
 
+    # Calculate cost estimation and ROI (now with ML model)
+    if ML_COST_MODEL_AVAILABLE:
+        try:
+            predictor = get_cost_predictor()
+            cost_estimation = predictor.estimate_rwh_system_cost(
+                roof_area_m2=roof_area,
+                roof_type=roof_type,
+                soil_type=soil_type,
+                tank_volume_l=tank_volume_l
+            )
+            # Ensure consistent format
+            cost_estimation = {
+                'storage_tank': cost_estimation['storage_tank'],
+                'recharge_pit': cost_estimation['recharge_pit'], 
+                'gutters_pipes': cost_estimation['gutters_pipes'],
+                'filtration_system': cost_estimation['filtration_system'],
+                'installation': cost_estimation['installation'],
+                'total': cost_estimation['total'],
+                'currency': cost_estimation.get('currency', 'INR'),
+                'model_used': 'ML_trained'
+            }
+        except Exception as e:
+            print(f"ML model failed, using fallback: {e}")
+            cost_estimation = calculate_cost_estimation_fallback(
+                tank_volume_l, roof_area, soil_type, potential_water_save_l_per_year
+            )
+    else:
+        cost_estimation = calculate_cost_estimation_fallback(
+            tank_volume_l, roof_area, soil_type, potential_water_save_l_per_year
+        )
+    
+    roi = calculate_roi(potential_water_save_l_per_year, cost_estimation)
+    
+    # Calculate feasibility
+    feasibility, feasibility_description = calculate_feasibility(
+        potential_water_save_l_per_year, roof_area, soil_type
+    )
+    
+    # Get recommendations and additional data
+    recommended_structures = get_recommended_structures(roof_type, soil_type, roof_area)
+    rainfall_distribution = get_monthly_rainfall_distribution()
+    groundwater_level = estimate_groundwater_level(soil_type)
+
     return {
         "potential_harvest": potential_water_save_l_per_year,
         "tank_volume": tank_volume_l,
         "efficiency": efficiency,
-        "inertia": inertia  # <-- taken from run_kmeans
+        "inertia": inertia,
+        "cost_estimation": cost_estimation,
+        "roi": roi,
+        "feasibility": feasibility,
+        "feasibility_description": feasibility_description,
+        "recommended_structures": recommended_structures,
+        "rainfall_distribution": rainfall_distribution,
+        "groundwater_level": groundwater_level
     }
 
 

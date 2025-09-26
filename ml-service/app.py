@@ -86,6 +86,13 @@ def _run_prediction(data: AssessmentInput):
         "tank_volume": result["tank_volume"],
         "efficiency": result["efficiency"],
         "inertia": result["inertia"],
+        "cost_estimation": result["cost_estimation"],
+        "roi": result["roi"],
+        "feasibility": result["feasibility"],
+        "feasibility_description": result["feasibility_description"],
+        "recommended_structures": result["recommended_structures"],
+        "rainfall_distribution": result["rainfall_distribution"],
+        "groundwater_level": result["groundwater_level"],
     }
 
 

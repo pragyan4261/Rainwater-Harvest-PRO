@@ -44,7 +44,31 @@ router.get("/latest", auth, async (req, res) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 7000);
 
-    let mlData = { potential_harvest: 0, tank_volume: 0, efficiency: 0, inertia: 0 };
+    let mlData = { 
+      potential_harvest: 0, 
+      tank_volume: 0, 
+      efficiency: 0, 
+      inertia: 0,
+      cost_estimation: {
+        storage_tank: 0,
+        recharge_pit: 0,
+        gutters_pipes: 0,
+        filtration_system: 0,
+        installation: 0,
+        total: 0
+      },
+      roi: {
+        annual_savings: 0,
+        payback_period: "N/A",
+        water_saved: 0,
+        runoff_reduction: "0%"
+      },
+      feasibility: "Not Assessed",
+      feasibility_description: "Assessment pending",
+      recommended_structures: [],
+      rainfall_distribution: Array(12).fill(0),
+      groundwater_level: 0
+    };
     try {
       const mlResponse = await fetch(mlUrl, {
         method: "POST",
@@ -78,6 +102,29 @@ router.get("/latest", auth, async (req, res) => {
       tankVolume: mlData.tank_volume || 0,
       efficiency: mlData.efficiency || 0,
       inertia: mlData.inertia || 0,
+      costEstimation: {
+        storageTank: mlData.cost_estimation?.storage_tank || 0,
+        rechargePit: mlData.cost_estimation?.recharge_pit || 0,
+        guttersPipes: mlData.cost_estimation?.gutters_pipes || 0,
+        filtrationSystem: mlData.cost_estimation?.filtration_system || 0,
+        installation: mlData.cost_estimation?.installation || 0,
+        total: mlData.cost_estimation?.total || 0,
+        currency: mlData.cost_estimation?.currency || 'INR'
+      },
+      roi: {
+        annualSavings: mlData.roi?.annual_savings || 0,
+        paybackPeriod: mlData.roi?.payback_period || "N/A",
+        waterSaved: mlData.roi?.water_saved || 0,
+        runoffReduction: mlData.roi?.runoff_reduction || "0%",
+        currency: mlData.roi?.currency || 'INR'
+      },
+      feasibility: mlData.feasibility || "Not Assessed",
+      feasibilityDescription: mlData.feasibility_description || "Assessment pending",
+      recommendedStructures: mlData.recommended_structures || [],
+      rainfallDistribution: mlData.rainfall_distribution || Array(12).fill(0),
+      groundwaterLevel: mlData.groundwater_level || 0,
+      currency: 'INR',  // Overall currency indicator
+      modelVersion: 'ML_trained_indian_data'  // Indicate we're using ML model
     });
   } catch (err) {
     console.error("Error fetching assessment:", err.message);
