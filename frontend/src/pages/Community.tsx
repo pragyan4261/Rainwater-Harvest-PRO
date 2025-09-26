@@ -352,7 +352,7 @@ const Community: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-8">
+      <div className="space-y-8 overflow-y-hidden">
         <header className="flex flex-col gap-4">
           <div>
             <h1 className="text-3xl font-semibold text-gray-800">Community Water Impact</h1>
