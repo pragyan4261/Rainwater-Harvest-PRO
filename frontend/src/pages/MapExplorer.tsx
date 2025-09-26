@@ -6,6 +6,43 @@ import { useMap } from '../hooks/useMap';
 import { useTranslation } from "react-i18next";
 import L from 'leaflet';
 
+// Fix for marker icons in production deployment
+const createCustomIcon = (color: string) => {
+  return L.divIcon({
+    html: `
+      <div style="
+        background-color: ${color};
+        width: 24px;
+        height: 24px;
+        border-radius: 50% 50% 50% 0;
+        border: 3px solid white;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <div style="
+          width: 8px;
+          height: 8px;
+          background-color: white;
+          border-radius: 50%;
+          transform: rotate(45deg);
+        "></div>
+      </div>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24],
+    className: 'custom-marker-icon'
+  });
+};
+
+// Create different colored markers
+const userLocationIcon = createCustomIcon('#ef4444'); // Red for user location
+const searchResultIcon = createCustomIcon('#3b82f6'); // Blue for search results
+const measurementIcon = createCustomIcon('#10b981'); // Green for measurement points
+
 const { BaseLayer } = LayersControl;
 
 const MapExplorer: React.FC = () => {
@@ -99,12 +136,12 @@ const MapExplorer: React.FC = () => {
   // Refresh precipitation data with current timestamp
   const refreshPrecipitationData = () => {
     if (!showPrecipitationHeatmap || !mapRef.current) return;
-    
+
     // Remove current layer
     if (precipitationLayerRef.current) {
       mapRef.current.removeLayer(precipitationLayerRef.current);
     }
-    
+
     // Add new layer with updated timestamp
     const newTimestamp = new Date().toISOString();
     const precipitationLayer = L.tileLayer(
@@ -119,6 +156,30 @@ const MapExplorer: React.FC = () => {
     precipitationLayer.addTo(mapRef.current);
     precipitationLayerRef.current = precipitationLayer;
   };
+
+  // Custom layer control names with icons
+  useEffect(() => {
+    const updateLayerControlNames = () => {
+      setTimeout(() => {
+        const layerControls = document.querySelectorAll('.leaflet-control-layers-base label span');
+        if (layerControls.length >= 2) {
+          layerControls[0].textContent = '🗺️ Street Map';
+          layerControls[1].textContent = '🛰️ Satellite View';
+        }
+      }, 100);
+    };
+
+    updateLayerControlNames();
+    
+    // Also update when the map is ready
+    const map = mapRef.current;
+    if (map) {
+      map.on('layercontrolopen', updateLayerControlNames);
+      return () => {
+        map.off('layercontrolopen', updateLayerControlNames);
+      };
+    }
+  }, []);
 
   // Recalculate distance whenever points change
   useEffect(() => {
@@ -142,7 +203,10 @@ const MapExplorer: React.FC = () => {
       if (!isMeasuring) return;
       const latlng = e.latlng;
       // Add marker
-      const marker = L.marker(latlng, { draggable: false });
+      const marker = L.marker(latlng, {
+        draggable: false,
+        icon: measurementIcon
+      });
       marker.addTo(map);
       measureMarkersRef.current.push(marker);
       // Update points state
@@ -165,7 +229,7 @@ const MapExplorer: React.FC = () => {
   // Zoom to user location
   const handleZoomToUser = () => {
     if (mapRef.current) {
-      mapRef.current.setView([position.lat, position.lng], 30, { animate: true }); 
+      mapRef.current.setView([position.lat, position.lng], 30, { animate: true });
     }
   };
 
@@ -187,14 +251,14 @@ const MapExplorer: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">RainWise {t("mapExplorer.title")}</h1>
           <p className="text-gray-600">
-           {t("mapExplorer.subtitle")}
+            {t("mapExplorer.subtitle")}
           </p>
         </div>
       </div>
       <div className="relative h-[calc(100vh-200px)] min-h-[500px] rounded-xl overflow-hidden">
         <MapContainer
           center={[position.lat, position.lng]}
-          zoom={20} 
+          zoom={20}
           scrollWheelZoom={true}
           style={{ height: "100%", width: "100%" }}
           ref={mapRef}
@@ -215,7 +279,7 @@ const MapExplorer: React.FC = () => {
               <button onClick={resetMeasurement} className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-400">Clear</button>
             )}
             <div className="mt-1 text-gray-700">
-              Distance: { (totalDistance/1000).toFixed(3) } km
+              Distance: {(totalDistance / 1000).toFixed(3)} km
             </div>
             {measurePoints.length > 1 && isMeasuring && (
               <div className="text-[10px] text-gray-500">(Click Finish to lock)</div>
@@ -224,11 +288,10 @@ const MapExplorer: React.FC = () => {
             <div className="mt-2 border-t border-gray-300 pt-2">
               <button
                 onClick={togglePrecipitationHeatmap}
-                className={`w-full px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${
-                  showPrecipitationHeatmap 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md hover:from-blue-600 hover:to-blue-700' 
+                className={`w-full px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${showPrecipitationHeatmap
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md hover:from-blue-600 hover:to-blue-700'
                     : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
-                }`}
+                  }`}
               >
                 <span className={`w-2 h-2 rounded-full ${showPrecipitationHeatmap ? 'bg-white' : 'bg-blue-500'}`}></span>
                 {showPrecipitationHeatmap ? '🌧️ Hide Rain Data' : '🌦️ Show Rain Data'}
@@ -241,7 +304,7 @@ const MapExplorer: React.FC = () => {
                     <div className="flex-1 mx-2 h-2 rounded bg-gradient-to-r from-transparent via-blue-300 to-blue-600"></div>
                     <span>Heavy</span>
                   </div>
-                  
+
                   {/* Opacity Control */}
                   <div className="mt-2 border-t border-gray-200 pt-2">
                     <div className="flex items-center justify-between text-gray-600 mb-1">
@@ -260,7 +323,7 @@ const MapExplorer: React.FC = () => {
                       title="Adjust precipitation layer transparency"
                     />
                   </div>
-                  
+
                   <div className="text-center text-gray-500 mt-1 flex items-center justify-between">
                     <div className="flex items-center gap-1">
                       <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
@@ -279,7 +342,7 @@ const MapExplorer: React.FC = () => {
             </div>
           </div>
           <LayersControl position="topright">
-            <BaseLayer checked name="Default View">
+            <BaseLayer checked name="Street Map">
               <TileLayer
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -292,7 +355,7 @@ const MapExplorer: React.FC = () => {
               />
             </BaseLayer>
           </LayersControl>
-          <Marker position={[position.lat, position.lng]}>
+          <Marker position={[position.lat, position.lng]} icon={userLocationIcon}>
             <Popup>
               {t("mapExplorer.yourLocation")}<br />
               (Lat: {position.lat}, Lng: {position.lng})
@@ -300,7 +363,7 @@ const MapExplorer: React.FC = () => {
           </Marker>
           {/* Show search results as markers */}
           {searchResults.map((result, idx) => (
-            <Marker key={idx} position={[parseFloat(result.lat), parseFloat(result.lon)]}>
+            <Marker key={idx} position={[parseFloat(result.lat), parseFloat(result.lon)]} icon={searchResultIcon}>
               <Popup>{result.display_name}</Popup>
             </Marker>
           ))}
