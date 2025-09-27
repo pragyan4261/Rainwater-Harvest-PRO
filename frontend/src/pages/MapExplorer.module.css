@@ -1,0 +1,757 @@
+/* MapExplorer Animations and Styles */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Base Animation Classes */
+.fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.slideInLeft {
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+.slideInRight {
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+.slideInDown {
+  animation: slideInDown 0.6s ease-out forwards;
+}
+
+.slideInUp {
+  animation: slideInUp 0.6s ease-out forwards;
+}
+
+.pulseEffect {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.shimmerEffect {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.floatAnimation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.glowEffect {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Staggered Animation Delays */
+.staggerDelay1 {
+  animation-delay: 0.1s;
+}
+
+.staggerDelay2 {
+  animation-delay: 0.2s;
+}
+
+.staggerDelay3 {
+  animation-delay: 0.3s;
+}
+
+.staggerDelay4 {
+  animation-delay: 0.4s;
+}
+
+/* Modern Header Styles */
+.headerSection {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.headerSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.gradientText {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Map Container Enhancements */
+.mapContainer {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.mapContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Control Panel Enhancements */
+.controlPanel {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.controlPanel:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+/* Measurement Controls */
+.measurementControls {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Mobile Responsive Enhancements for Controls */
+@media (max-width: 639px) {
+  .measurementControls {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+    box-shadow: 
+      0 8px 15px -3px rgba(0, 0, 0, 0.12),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Icon-only buttons on mobile */
+  .measurementControls .modernButton {
+    touch-action: manipulation;
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Expanded panel animation */
+  .measurementControls > div:last-child {
+    animation: slideInDown 0.3s ease-out;
+  }
+  
+  /* Mobile toggle buttons positioning */
+  .measurementControls {
+    position: relative;
+  }
+  
+  /* Ensure proper spacing between mobile control panels */
+  .measurementControls:nth-of-type(2) {
+    top: 5rem !important; /* 80px equivalent */
+  }
+}
+
+/* Button Enhancements */
+.modernButton {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.modernButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.modernButton:hover::before {
+  left: 100%;
+}
+
+.modernButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  border: none;
+}
+
+.primaryButton:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.secondaryButton {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  border: none;
+}
+
+.secondaryButton:hover {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+
+.warningButton {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: none;
+}
+
+.warningButton:hover {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.dangerButton {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+}
+
+.dangerButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Search Form Enhancements */
+.searchForm {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.searchForm:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.15),
+    0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.searchInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.searchInput::placeholder {
+  color: rgba(107, 114, 128, 0.8);
+}
+
+.searchInput:focus {
+  color: #1f2937;
+}
+
+/* Precipitation Controls */
+.precipitationPanel {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 20px 25px -5px rgba(59, 130, 246, 0.1),
+    0 10px 10px -5px rgba(59, 130, 246, 0.04);
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.precipitationToggle {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.precipitationToggle.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+  transform: scale(1.02);
+}
+
+.precipitationToggle.inactive {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(209, 213, 219, 0.8);
+}
+
+.precipitationToggle.inactive:hover {
+  background: linear-gradient(145deg, #f9fafb 0%, #f3f4f6 100%);
+  border-color: rgba(156, 163, 175, 0.8);
+}
+
+/* Range Slider Styling */
+.precipitationSlider {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.8));
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.precipitationSlider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.precipitationSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+}
+
+.precipitationSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.precipitationSlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Status Indicators */
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #047857;
+}
+
+.statusIndicator .pulse {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Distance Display */
+.distanceDisplay {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(67, 56, 202, 0.1) 100%);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-weight: 600;
+  color: #4338ca;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1);
+}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 768px) {
+  .fadeInUp, .slideInLeft, .slideInRight, .slideInDown, .slideInUp {
+    animation-duration: 0.4s;
+  }
+  
+  .controlPanel {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  
+  .measurementControls {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .searchForm {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  
+  .modernButton {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .modernButton:hover {
+    transform: none;
+  }
+  
+  .headerSection {
+    padding: 1.5rem 1rem;
+  }
+  
+  .mapContainer {
+    margin: 0 -0.5rem;
+    border-radius: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .controlPanel {
+    margin: 0.5rem;
+    border-radius: 0.75rem;
+  }
+  
+  .measurementControls {
+    margin: 0.5rem;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    max-width: none;
+    width: auto;
+  }
+  
+  .searchForm {
+    margin: 1rem;
+    border-radius: 0.75rem;
+  }
+  
+  .mapContainer {
+    border-radius: 1rem;
+  }
+  
+  .precipitationPanel {
+    padding: 0.75rem;
+  }
+  
+  .distanceDisplay {
+    padding: 0.5rem;
+  }
+  
+  .statusIndicator {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.625rem;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .measurementControls {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 140px !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .searchForm {
+    padding: 0.75rem;
+  }
+  
+  .modernButton {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    min-height: 2.5rem;
+  }
+  
+  .headerSection {
+    padding: 1rem 0.75rem;
+  }
+  
+  .headerSection h1 {
+    font-size: 1.75rem;
+  }
+  
+  .statusIndicator {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .measurementControls {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    left: auto !important;
+    width: 280px;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  
+  .headerSection {
+    padding: 0.75rem 1rem;
+  }
+  
+  .headerSection h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* High DPI displays */
+@media (min-resolution: 2dppx) {
+  .custom-marker-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  .modernButton {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .precipitationSlider {
+    height: 6px;
+  }
+  
+  .precipitationSlider::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .precipitationSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .statusIndicator {
+    min-height: 32px;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .fadeInUp, .slideInLeft, .slideInRight, .slideInDown, .slideInUp,
+  .pulseEffect, .shimmerEffect, .floatAnimation, .glowEffect {
+    animation: none;
+  }
+  
+  .modernButton:hover, .controlPanel:hover, .searchForm:focus-within {
+    transform: none;
+  }
+}
+
+/* Loading States */
+.loadingSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Layer Control Styling */
+.leaflet-control-layers {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 1rem !important;
+}
+
+/* Custom Marker Enhancements */
+.custom-marker-icon {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.custom-marker-icon:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15));
+}
+
+/* Custom Layer Control Styles */
+.customLayerControl {
+  -webkit-user-select: none;
+  user-select: none;
+  z-index: 1001;
+}
+
+.layerToggleButton {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+}
+
+.layerToggleButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.layerToggleButton:active {
+  transform: translateY(0);
+}
+
+.layerMenu {
+  animation: slideInDown 0.2s ease-out;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  z-index: 1000;
+}
+
+.layerButton {
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.layerButton:hover {
+  background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #1f2937;
+  transform: translateX(2px);
+}
+
+.activeLayerButton {
+  background: linear-gradient(145deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1d4ed8;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.activeLayerButton:hover {
+  background: linear-gradient(145deg, #bfdbfe 0%, #93c5fd 100%);
+  transform: none;
+}

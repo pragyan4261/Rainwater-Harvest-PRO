@@ -1,10 +1,21 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import {
+  MapIcon,
+  SearchIcon,
+  RulerIcon,
+  LayersIcon,
+  NavigationIcon,
+  ActivityIcon,
+  EyeIcon,
+  ZapIcon,
+} from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
 import { useMap } from '../hooks/useMap';
 import { useTranslation } from "react-i18next";
 import L from 'leaflet';
+import styles from './MapExplorer.module.css';
 
 // Fix for marker icons in production deployment
 const createCustomIcon = (color: string) => {
@@ -43,8 +54,6 @@ const userLocationIcon = createCustomIcon('#ef4444'); // Red for user location
 const searchResultIcon = createCustomIcon('#3b82f6'); // Blue for search results
 const measurementIcon = createCustomIcon('#10b981'); // Green for measurement points
 
-const { BaseLayer } = LayersControl;
-
 const MapExplorer: React.FC = () => {
   const { t } = useTranslation();
   const { position } = useMap();
@@ -57,15 +66,50 @@ const MapExplorer: React.FC = () => {
   const [measurePoints, setMeasurePoints] = useState<L.LatLng[]>([]);
   const [totalDistance, setTotalDistance] = useState(0); // meters
 
-  // Precipitation heatmap state
-  const [showPrecipitationHeatmap, setShowPrecipitationHeatmap] = useState(false);
-  const [precipitationOpacity, setPrecipitationOpacity] = useState(0.8);
-  const precipitationLayerRef = useRef<L.TileLayer | null>(null);
+  // Map layer control state
+  const [currentMapLayer, setCurrentMapLayer] = useState('street'); // 'street', 'satellite', 'terrain'
+  const [isLayerMenuOpen, setIsLayerMenuOpen] = useState(false);
 
-  // Tomorrow.io API configuration
-  const TOMORROW_API_KEY = 'BTEvHO0kVYUl4eNcrogWQnwFsEon7S1a';
-  const DATA_FIELD = 'precipitationIntensity';
-  const TIMESTAMP = (new Date()).toISOString();
+  // Close layer menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isLayerMenuOpen && !target.closest(`.${styles.customLayerControl}`)) {
+        setIsLayerMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isLayerMenuOpen]);
+
+  // Layer configurations
+  const layerConfigs = {
+    street: {
+      name: '🗺️ Street Map',
+      url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    },
+    satellite: {
+      name: '🛰️ Satellite View',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+      maxZoom: 17
+    },
+    terrain: {
+      name: '⛰️ Terrain View',
+      url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 17
+    }
+  };
+
+  // Handle layer change
+  const handleLayerChange = (layerType: string) => {
+    setCurrentMapLayer(layerType);
+    setIsLayerMenuOpen(false);
+  };
 
   // Refs to Leaflet objects for cleanup
   const measureMarkersRef = useRef<L.Marker[]>([]);
@@ -94,67 +138,6 @@ const MapExplorer: React.FC = () => {
 
   const finishMeasurement = () => {
     setIsMeasuring(false);
-  };
-
-  // Toggle precipitation heatmap
-  const togglePrecipitationHeatmap = () => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (showPrecipitationHeatmap) {
-      // Remove precipitation layer
-      if (precipitationLayerRef.current) {
-        map.removeLayer(precipitationLayerRef.current);
-        precipitationLayerRef.current = null;
-      }
-      setShowPrecipitationHeatmap(false);
-    } else {
-      // Add precipitation layer with enhanced visibility
-      const precipitationLayer = L.tileLayer(
-        `https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/${DATA_FIELD}/${TIMESTAMP}.png?apikey=${TOMORROW_API_KEY}`,
-        {
-          attribution: '&copy; <a href="https://www.tomorrow.io/weather-api">Tomorrow.io Weather API</a>',
-          opacity: precipitationOpacity, // Use dynamic opacity
-          zIndex: 1000,
-          className: 'precipitation-layer' // Custom class for styling
-        }
-      );
-      precipitationLayer.addTo(map);
-      precipitationLayerRef.current = precipitationLayer;
-      setShowPrecipitationHeatmap(true);
-    }
-  };
-
-  // Handle opacity change for precipitation layer
-  const handleOpacityChange = (newOpacity: number) => {
-    setPrecipitationOpacity(newOpacity);
-    if (precipitationLayerRef.current) {
-      precipitationLayerRef.current.setOpacity(newOpacity);
-    }
-  };
-
-  // Refresh precipitation data with current timestamp
-  const refreshPrecipitationData = () => {
-    if (!showPrecipitationHeatmap || !mapRef.current) return;
-
-    // Remove current layer
-    if (precipitationLayerRef.current) {
-      mapRef.current.removeLayer(precipitationLayerRef.current);
-    }
-
-    // Add new layer with updated timestamp
-    const newTimestamp = new Date().toISOString();
-    const precipitationLayer = L.tileLayer(
-      `https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/${DATA_FIELD}/${newTimestamp}.png?apikey=${TOMORROW_API_KEY}`,
-      {
-        attribution: '&copy; <a href="https://www.tomorrow.io/weather-api">Tomorrow.io Weather API</a>',
-        opacity: precipitationOpacity,
-        zIndex: 1000,
-        className: 'precipitation-layer'
-      }
-    );
-    precipitationLayer.addTo(mapRef.current);
-    precipitationLayerRef.current = precipitationLayer;
   };
 
   // Recalculate distance whenever points change
@@ -234,123 +217,161 @@ const MapExplorer: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">RainWise {t("mapExplorer.title")}</h1>
-          <p className="text-gray-600">
-            {t("mapExplorer.subtitle")}
-          </p>
+      {/* Enhanced Header Section */}
+      <div className={`relative mb-4 -mx-6 -mt-6 px-6 pt-6 pb-4 ${styles.headerSection} ${styles.fadeInUp}`}>
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="relative">
+          <div className={`flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 ${styles.slideInLeft}`}>
+            <div className="flex items-center space-x-4">
+              <div className={`w-12 h-12 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center backdrop-blur-sm ${styles.floatAnimation}`}>
+                <MapIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  RainWise {t("mapExplorer.title")}
+                </h1>
+                <p className="text-blue-100 font-medium text-lg">
+                  {t("mapExplorer.subtitle")}
+                </p>
+              </div>
+            </div>
+
+            {/* Header Stats */}
+            <div className={`flex items-center space-x-4 ${styles.slideInRight} ${styles.staggerDelay1}`}>
+              <div className="hidden lg:flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+                <ActivityIcon className="h-4 w-4 text-white" />
+                <span className="text-sm font-semibold text-white">Live Maps</span>
+              </div>
+              <div className="hidden lg:flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+                <EyeIcon className="h-4 w-4 text-white" />
+                <span className="text-sm font-semibold text-white">Interactive</span>
+              </div>
+              <div className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-20 rounded-full backdrop-blur-sm">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-white">Real-time Data</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="relative h-[calc(100vh-200px)] min-h-[500px] rounded-xl overflow-hidden">
+      {/* Enhanced Map Container */}
+      <div className={`relative ${styles.mapContainer} rounded-2xl shadow-2xl overflow-hidden ${styles.fadeInUp} ${styles.staggerDelay2}`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-green-500/5 pointer-events-none z-10"></div>
+        
         <MapContainer
           center={[position.lat, position.lng]}
           zoom={20}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%" }}
+          style={{ 
+            height: "calc(100vh - 160px)", 
+            minHeight: "600px", 
+            width: "100%"
+          }}
+          className="rounded-2xl z-20"
           ref={mapRef}
         >
-          {/* Measurement Controls (overlay) */}
-          <div className="absolute top-2 left-2 z-[1100] flex flex-col gap-2 bg-white/90 backdrop-blur px-3 py-2 rounded shadow pointer-events-auto text-xs sm:text-sm max-w-[200px]">
-            {!isMeasuring && (
-              <button onClick={startMeasurement} className="px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-500">Start Measure</button>
-            )}
-            {isMeasuring && (
-              <>
-                <div className="font-medium text-gray-800">Click map to add points</div>
-                <button onClick={finishMeasurement} className="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-500">Finish</button>
-                <button onClick={resetMeasurement} className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-400">Reset</button>
-              </>
-            )}
-            {!isMeasuring && measurePoints.length > 1 && (
-              <button onClick={resetMeasurement} className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-400">Clear</button>
-            )}
-            <div className="mt-1 text-gray-700">
-              Distance: {(totalDistance / 1000).toFixed(3)} km
-            </div>
-            {measurePoints.length > 1 && isMeasuring && (
-              <div className="text-[10px] text-gray-500">(Click Finish to lock)</div>
-            )}
-            {/* Precipitation Heatmap Toggle */}
-            <div className="mt-2 border-t border-gray-300 pt-2">
-              <button
-                onClick={togglePrecipitationHeatmap}
-                className={`w-full px-3 py-2 rounded-md text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 ${showPrecipitationHeatmap
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md hover:from-blue-600 hover:to-blue-700'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
-                  }`}
-              >
-                <span className={`w-2 h-2 rounded-full ${showPrecipitationHeatmap ? 'bg-white' : 'bg-blue-500'}`}></span>
-                {showPrecipitationHeatmap ? '🌧️ Hide Rain Data' : '🌦️ Show Rain Data'}
-              </button>
-              {showPrecipitationHeatmap && (
-                <div className="mt-2 p-2 bg-white/95 rounded border text-[10px]">
-                  <div className="font-medium text-gray-800 mb-1">Precipitation Intensity</div>
-                  <div className="flex items-center justify-between text-gray-600 mb-2">
-                    <span>Light</span>
-                    <div className="flex-1 mx-2 h-2 rounded bg-gradient-to-r from-transparent via-blue-300 to-blue-600"></div>
-                    <span>Heavy</span>
+          {/* Enhanced Measurement Controls - Hidden on Mobile */}
+          <div className={`hidden sm:block absolute top-4 left-4 z-[1100] ${styles.measurementControls} ${styles.slideInDown} rounded-2xl max-w-xs sm:max-w-sm`}>
+            {/* Panel Content - Desktop Only */}
+            <div className="p-4">
+              <div className="flex items-center space-x-2 mb-3">
+                <RulerIcon className="h-5 w-5 text-blue-600" />
+                <h3 className="font-bold text-gray-800 text-sm">Distance Measurement</h3>
+              </div>
+              
+              {!isMeasuring && (
+                <button 
+                  onClick={startMeasurement} 
+                  className={`w-full ${styles.modernButton} ${styles.primaryButton} text-white px-4 py-3 rounded-xl text-sm font-semibold flex items-center justify-center space-x-2`}
+                >
+                  <RulerIcon className="h-4 w-4" />
+                  <span>Start Measuring</span>
+                </button>
+              )}
+              
+              {isMeasuring && (
+                <div className="space-y-3">
+                  <div className={`${styles.statusIndicator} text-xs`}>
+                    <NavigationIcon className="h-3 w-3" />
+                    <span>Click map to add points</span>
                   </div>
-
-                  {/* Opacity Control */}
-                  <div className="mt-2 border-t border-gray-200 pt-2">
-                    <div className="flex items-center justify-between text-gray-600 mb-1">
-                      <label htmlFor="precipitation-opacity" className="text-[10px]">Transparency</label>
-                      <span className="text-blue-600 font-medium">{Math.round(precipitationOpacity * 100)}%</span>
-                    </div>
-                    <input
-                      id="precipitation-opacity"
-                      type="range"
-                      min="0.2"
-                      max="1"
-                      step="0.1"
-                      value={precipitationOpacity}
-                      onChange={(e) => handleOpacityChange(parseFloat(e.target.value))}
-                      className="w-full precipitation-opacity-slider"
-                      title="Adjust precipitation layer transparency"
-                    />
-                  </div>
-
-                  <div className="text-center text-gray-500 mt-1 flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
-                      <span>Live weather data</span>
-                    </div>
-                    <button
-                      onClick={refreshPrecipitationData}
-                      className="text-blue-600 hover:text-blue-700 text-[10px] underline"
-                      title="Refresh precipitation data"
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={finishMeasurement} 
+                      className={`flex-1 ${styles.modernButton} ${styles.secondaryButton} text-white px-3 py-2 rounded-lg text-xs font-semibold`}
                     >
-                      🔄 Refresh
+                      Finish
+                    </button>
+                    <button 
+                      onClick={resetMeasurement} 
+                      className={`flex-1 ${styles.modernButton} ${styles.dangerButton} text-white px-3 py-2 rounded-lg text-xs font-semibold`}
+                    >
+                      Reset
                     </button>
                   </div>
                 </div>
               )}
+              
+              {!isMeasuring && measurePoints.length > 1 && (
+                <button 
+                  onClick={resetMeasurement} 
+                  className={`w-full mt-3 ${styles.modernButton} ${styles.warningButton} text-white px-4 py-2 rounded-lg text-sm font-semibold`}
+                >
+                  Clear Measurement
+                </button>
+              )}
+              
+              <div className={`mt-4 ${styles.distanceDisplay}`}>
+                <div className="text-xs text-gray-600 mb-1">Total Distance</div>
+                <div className="text-lg font-bold">{(totalDistance / 1000).toFixed(3)} km</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {measurePoints.length} point{measurePoints.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+              
+              {measurePoints.length > 1 && isMeasuring && (
+                <div className={`mt-2 text-xs text-gray-500 ${styles.statusIndicator}`}>
+                  <ZapIcon className="h-3 w-3" />
+                  <span>Click Finish to lock measurement</span>
+                </div>
+              )}
             </div>
           </div>
-          <LayersControl position="topright" collapsed={true}>
-            <BaseLayer checked name="🗺️ Street Map">
-              <TileLayer
-                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                maxZoom={19}
-              />
-            </BaseLayer>
-            <BaseLayer name="🛰️ Satellite View">
-              <TileLayer
-                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                maxZoom={17}
-              />
-            </BaseLayer>
-            <BaseLayer name="🗺️ Terrain View">
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                maxZoom={17}
-              />
-            </BaseLayer>
-          </LayersControl>
+          
+          {/* Custom Layer Control */}
+          <div className={`${styles.customLayerControl} absolute top-4 right-4`}>
+            <button
+              onClick={() => setIsLayerMenuOpen(!isLayerMenuOpen)}
+              className={`${styles.layerToggleButton} p-3 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg hover:bg-white/95 transition-all duration-300`}
+              title="Change Map Layer"
+            >
+              <LayersIcon size={20} className="text-gray-700" />
+            </button>
+            
+            {isLayerMenuOpen && (
+              <div className={`${styles.layerMenu} absolute top-14 right-0 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-2 min-w-[180px]`}>
+                {Object.entries(layerConfigs).map(([key, config]) => (
+                  <button
+                    key={key}
+                    onClick={() => handleLayerChange(key)}
+                    className={`${currentMapLayer === key ? styles.activeLayerButton : styles.layerButton} w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2`}
+                  >
+                    <span>{config.name}</span>
+                    {currentMapLayer === key && <span className="text-blue-500 ml-auto">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Map Container with dynamic tile layer */}
+          <TileLayer
+            key={currentMapLayer} // Force re-render when layer changes
+            attribution={layerConfigs[currentMapLayer as keyof typeof layerConfigs].attribution}
+            url={layerConfigs[currentMapLayer as keyof typeof layerConfigs].url}
+            maxZoom={layerConfigs[currentMapLayer as keyof typeof layerConfigs].maxZoom}
+          />
+          
           <Marker position={[position.lat, position.lng]} icon={userLocationIcon}>
             <Popup>
               {t("mapExplorer.yourLocation")}<br />
@@ -363,27 +384,75 @@ const MapExplorer: React.FC = () => {
               <Popup>{result.display_name}</Popup>
             </Marker>
           ))}
-          {/* Responsive controls at bottom for mobile */}
-          <div className="absolute bottom-0 left-0 w-full z-[1100] flex flex-col sm:flex-row sm:justify-between gap-2 p-4 pointer-events-auto">
-            <form
-              onSubmit={handleSearch}
-              className="flex-1 bg-white rounded-lg shadow-md p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
-            >
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder={t("mapExplorer.searchPlaceholder")}
-                className="flex-1 py-2 px-2 text-sm focus:outline-none rounded"
-              />
-              <button type="submit" className="w-full sm:w-auto px-3 py-2 bg-blue-600 text-white rounded">{t("mapExplorer.searchButton")}</button>
-            </form>
-            <button
-              onClick={handleZoomToUser}
-              className="w-full sm:w-auto px-3 py-2 bg-green-600 text-white rounded shadow"
-            >
-              {t("mapExplorer.zoomButton")}
-            </button>
+          {/* Enhanced Bottom Controls - Mobile Responsive */}
+          <div className={`absolute bottom-0 left-0 right-0 z-[1100] p-4 sm:p-6 ${styles.slideInUp} ${styles.staggerDelay3}`}>
+            <div className="flex flex-col lg:flex-row gap-4 max-w-7xl mx-auto max-h-14">
+              {/* Enhanced Search Form */}
+              <form
+                onSubmit={handleSearch}
+                className={`flex-1 ${styles.searchForm} rounded-2xl p-4 transition-all duration-300`}
+              >
+                <div className="flex flex-col sm:flex-row items-stretch gap-3">
+                  <div className="flex-1 relative">
+                    <SearchIcon className="absolute left-3 top-1/4 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      placeholder={t("mapExplorer.searchPlaceholder") || "Search for places, landmarks, or addresses..."}
+                      className={`${styles.searchInput} w-full pl-10 pr-4 py-0 text-base font-medium focus:outline-none`}
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    className={`${styles.modernButton} ${styles.primaryButton} text-white mt-[-6px] px-6 py-2 rounded-xl font-semibold  flex items-center justify-center space-x-2 whitespace-nowrap min-w-[120px]`}
+                    disabled={!search.trim()}
+                  >
+                    <SearchIcon className="h-4 w-4" />
+                    <span>{t("mapExplorer.searchButton")}</span>
+                  </button>
+                </div>
+              </form>
+
+              {/* Enhanced Location Button */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleZoomToUser}
+                  className={`${styles.modernButton} ${styles.secondaryButton} text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 whitespace-nowrap min-w-[140px]`}
+                >
+                  <NavigationIcon className="h-4 w-4" />
+                  <span>{t("mapExplorer.zoomButton")}</span>
+                </button>
+                
+                {/* Additional Quick Actions */}
+                <div className="hidden lg:flex items-center space-x-3">
+                  <div className={`${styles.statusIndicator} px-3 py-2`}>
+                    <LayersIcon className="h-4 w-4 text-green-600" />
+                    <span className="text-xs font-semibold">Interactive Map</span>
+                  </div>
+                  <div className={`${styles.statusIndicator} px-3 py-2`}>
+                    <EyeIcon className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-semibold">Real-time View</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile-only Quick Stats */}
+            <div className="flex lg:hidden items-center justify-center space-x-4 mt-3 pt-3 border-t border-gray-200">
+              <div className={`${styles.statusIndicator} px-2 py-1`}>
+                <LayersIcon className="h-3 w-3 text-green-600" />
+                <span className="text-xs font-medium">Interactive</span>
+              </div>
+              <div className={`${styles.statusIndicator} px-2 py-1`}>
+                <EyeIcon className="h-3 w-3 text-blue-600" />
+                <span className="text-xs font-medium">Real-time</span>
+              </div>
+              <div className={`${styles.statusIndicator} px-2 py-1`}>
+                <ZapIcon className="h-3 w-3 text-purple-600" />
+                <span className="text-xs font-medium">Live Data</span>
+              </div>
+            </div>
           </div>
         </MapContainer>
       </div>
