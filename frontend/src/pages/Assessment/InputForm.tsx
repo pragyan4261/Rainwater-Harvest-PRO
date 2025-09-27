@@ -363,7 +363,7 @@ const AssessmentInput: React.FC = () => {
               }
             />
             {/* File upload placeholder */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-gray-700 text-sm font-medium mb-1">
                 {t("assessment.propertyDetails.roofPhoto")}
               </label>
@@ -377,9 +377,9 @@ const AssessmentInput: React.FC = () => {
                     {t("assessment.propertyDetails.orBrowse")}
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
-          </div>
+          // </div>
         )}
 
         {/* Step 3: Location Details */}
