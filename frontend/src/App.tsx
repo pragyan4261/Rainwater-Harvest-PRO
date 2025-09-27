@@ -6,7 +6,7 @@ import SplashScreen from './pages/SplashScreen/SplashScreen';
 import Onboarding from './pages/Onboarding/Onboarding';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard/Dashboard';
 import AssessmentInput from './pages/Assessment/InputForm';
 import AssessmentResults from './pages/Assessment/Results';
 import MapExplorer from './pages/MapExplorer';

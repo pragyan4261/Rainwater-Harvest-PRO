@@ -18,9 +18,9 @@ import {
   ActivityIcon,
   CalendarIcon
 } from 'lucide-react';
-import MainLayout from '../layouts/MainLayout';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
+import MainLayout from '../../layouts/MainLayout';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
 import { useTranslation } from "react-i18next";
 import styles from './Dashboard.module.css';
 

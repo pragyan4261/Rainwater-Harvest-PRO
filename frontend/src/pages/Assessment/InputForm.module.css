@@ -1,0 +1,394 @@
+/* InputForm Animations and Styles */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.25);
+  }
+}
+
+@keyframes progressFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+/* Base Animation Classes */
+.fadeInUp {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.slideInLeft {
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+.slideInRight {
+  animation: slideInRight 0.6s ease-out forwards;
+}
+
+.pulseEffect {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.shimmerEffect {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.floatAnimation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.glowEffect {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Staggered Animation Delays */
+.staggerDelay1 {
+  animation-delay: 0.1s;
+}
+
+.staggerDelay2 {
+  animation-delay: 0.2s;
+}
+
+.staggerDelay3 {
+  animation-delay: 0.3s;
+}
+
+.staggerDelay4 {
+  animation-delay: 0.4s;
+}
+
+/* Professional Card Styles */
+.modernCard {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.stepperCard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.stepperCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.formSection {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.formSection:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(59, 130, 246, 0.1);
+}
+
+/* Enhanced Step Indicator */
+.stepIndicator {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stepIndicator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transition: left 0.5s ease;
+}
+
+.stepIndicator:hover::before {
+  left: 100%;
+}
+
+.stepActive {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+  transform: scale(1.05);
+}
+
+.stepCompleted {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+}
+
+/* Progress Bar Enhancement */
+.progressBar {
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8, #3730a3);
+  background-size: 200% 100%;
+  animation: progressFlow 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressBar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Professional Text Styles */
+.gradientText {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: progressFlow 3s ease-in-out infinite;
+}
+
+.sectionTitle {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* Form Input Enhancements */
+.inputGroup {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-radius: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.inputGroup:focus-within::before {
+  opacity: 1;
+}
+
+/* Button Enhancements */
+.navigationButton {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.navigationButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.navigationButton:hover::before {
+  left: 100%;
+}
+
+.navigationButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Location Services Styling */
+.locationButton {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width:56;
+}
+
+.locationButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.locationButton:hover::before {
+  transform: translateX(100%);
+}
+
+.locationStatus {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Grid Layout Enhancements */
+.formGrid {
+  display: grid;
+  gap: 1.5rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.formGrid .inputGroup:nth-child(odd) {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.formGrid .inputGroup:nth-child(even) {
+  animation: slideInRight 0.6s ease-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .fadeInUp, .slideInLeft, .slideInRight {
+    animation-duration: 0.4s;
+  }
+  
+  .modernCard {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stepIndicator {
+    transform: scale(0.9);
+  }
+  
+  .stepActive {
+    transform: scale(0.95);
+  }
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .fadeInUp, .slideInLeft, .slideInRight, .pulseEffect, 
+  .shimmerEffect, .floatAnimation, .glowEffect, .progressBar {
+    animation: none;
+  }
+  
+  .navigationButton:hover, .formSection:hover {
+    transform: none;
+  }
+}
+
+/* Progress Bar Width Classes */
+.progressWidth33 {
+  width: 33.333333%;
+}
+
+.progressWidth66 {
+  width: 66.666667%;
+}
+
+.progressWidth100 {
+  width: 100%;
+}
