@@ -1,0 +1,126 @@
+/* SplashScreen Custom Animations */
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeIn {
+  animation: fade-in 1s ease-out;
+}
+
+/* Background Circles with Delays */
+.bgCircleDelay05 {
+  animation-delay: 0.5s;
+}
+
+.bgCircleDelay1 {
+  animation-delay: 1s;
+}
+
+.bgCircleDelay15 {
+  animation-delay: 1.5s;
+}
+
+/* Rain Drops Animation */
+.rainDrop1 {
+  width: 2px;
+  height: 15px;
+  left: 10%;
+  top: -20%;
+  animation-delay: 0s;
+  animation-duration: 2s;
+}
+
+.rainDrop2 {
+  width: 2px;
+  height: 12px;
+  left: 25%;
+  top: -30%;
+  animation-delay: 0.5s;
+  animation-duration: 2.5s;
+}
+
+.rainDrop3 {
+  width: 2px;
+  height: 18px;
+  left: 40%;
+  top: -15%;
+  animation-delay: 1s;
+  animation-duration: 3s;
+}
+
+.rainDrop4 {
+  width: 2px;
+  height: 20px;
+  left: 55%;
+  top: -25%;
+  animation-delay: 1.5s;
+  animation-duration: 2.8s;
+}
+
+.rainDrop5 {
+  width: 2px;
+  height: 14px;
+  left: 70%;
+  top: -35%;
+  animation-delay: 2s;
+  animation-duration: 2.3s;
+}
+
+.rainDrop6 {
+  width: 2px;
+  height: 16px;
+  left: 85%;
+  top: -20%;
+  animation-delay: 0.3s;
+  animation-duration: 2.7s;
+}
+
+/* Logo Ring Animations */
+.logoRingOuter {
+  animation-duration: 3s;
+}
+
+.logoRingInner {
+  animation-duration: 2s;
+  animation-direction: reverse;
+}
+
+/* Small Droplet Animations */
+.dropletPingDelay05 {
+  animation-delay: 0.5s;
+}
+
+/* Feature Icon Animations */
+.featureIconDelay0 {
+  animation-delay: 0s;
+}
+
+.featureIconDelay03 {
+  animation-delay: 0.3s;
+}
+
+.featureIconDelay06 {
+  animation-delay: 0.6s;
+}
+
+/* Progress Bar Animation */
+.progressBar {
+  transition: width 0.3s ease-out;
+}
+
+/* Floating Dots */
+.floatingDotDelay05 {
+  animation-delay: 0.5s;
+}
+
+.floatingDotDelay1 {
+  animation-delay: 1s;
+}
