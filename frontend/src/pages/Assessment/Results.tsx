@@ -16,6 +16,7 @@ import {
 import MainLayout from "../../layouts/MainLayout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
+import AssessmentLoader from "../../components/ui/AssessmentLoader";
 import { weatherService, type WeatherData } from "../../services/weatherService";
 
 interface AssessmentData {
@@ -107,8 +108,105 @@ const AssessmentResults: React.FC = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="flex justify-center items-center h-64">
-          <p className="text-gray-600">Loading assessment results...</p>
+        <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
+          {/* Main Loader Container */}
+          <div className="relative">
+            {/* Animated Water Droplets */}
+            <div className="flex space-x-2 mb-8">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="w-4 h-6 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full animate-bounce"
+                  style={{
+                    animationDelay: `${i * 0.2}s`,
+                    animationDuration: '1s'
+                  } as React.CSSProperties}
+                ></div>
+              ))}
+            </div>
+            
+            {/* Circular Progress Ring */}
+            <div className="relative w-24 h-24 mx-auto mb-6">
+              <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+              
+              {/* Center Icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <DropletIcon className="w-4 h-4 text-white animate-pulse" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Loading Text with Animated Dots */}
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                Loading Assessment Results
+              </h3>
+              <div className="flex items-center justify-center space-x-1 text-blue-600">
+                <span className="text-sm">Analyzing your data</span>
+                <div className="flex space-x-1">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"
+                      style={{
+                        animationDelay: `${i * 0.3}s`,
+                        animationDuration: '1.5s'
+                      } as React.CSSProperties}
+                    ></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Background Animation Elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {/* Floating Bubbles */}
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute bg-blue-200 rounded-full opacity-20 animate-bounce"
+                style={{
+                  width: `${Math.random() * 20 + 10}px`,
+                  height: `${Math.random() * 20 + 10}px`,
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${Math.random() * 3 + 2}s`
+                } as React.CSSProperties}
+              ></div>
+            ))}
+            
+            {/* Subtle Grid Pattern */}
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          </div>
+          
+          {/* Progress Steps Indicator */}
+          <div className="mt-12 flex items-center space-x-4">
+            {[
+              { label: 'Processing', icon: '🔄', active: true },
+              { label: 'Weather Data', icon: '🌦️', active: false },
+              { label: 'Analysis', icon: '📊', active: false },
+              { label: 'Results', icon: '✨', active: false }
+            ].map((step, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all duration-500 ${
+                  step.active 
+                    ? 'bg-blue-500 text-white animate-pulse' 
+                    : 'bg-gray-200 text-gray-400'
+                }`}>
+                  {step.icon}
+                </div>
+                <span className={`text-xs mt-2 transition-colors duration-500 ${
+                  step.active ? 'text-blue-600 font-medium' : 'text-gray-400'
+                }`}>
+                  {step.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </MainLayout>
     );
@@ -405,8 +503,7 @@ const AssessmentResults: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-3 text-gray-500">
                       <span>📊 Avg: {weatherData.daily.rain_sum && (weatherService.getWeeklyRainfall(weatherData.daily.rain_sum).reduce((sum, val) => sum + val, 0) / 7).toFixed(1)} mm/day</span>
-                      <span>•</span>
-                      <span>🌐 Open-Meteo API</span>
+                      
                     </div>
                   </div>
                   
