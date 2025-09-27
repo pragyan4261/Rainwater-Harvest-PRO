@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import uvicorn
 import k_means_v3
 from groundwater_predictor import groundwater_predictor
+from aquifer_data import get_nearest_aquifer_info
 
 
 SELF_PING_URL = (os.environ.get("SELF_PING_URL") or os.environ.get("RENDER_EXTERNAL_URL") or "").rstrip("/")
@@ -98,6 +99,11 @@ def _run_prediction(data: AssessmentInput):
         )
         groundwater_level = gw_result.get('groundwater_level', 10.0)
     
+    # Get nearest aquifer information if coordinates are provided
+    aquifer_info = None
+    if data.latitude and data.longitude:
+        aquifer_info = get_nearest_aquifer_info(data.latitude, data.longitude)
+    
     result = k_means_v3.predict_harvest(
         roof_area=data.roof_area,
         roof_type=data.roof_type,
@@ -107,6 +113,9 @@ def _run_prediction(data: AssessmentInput):
     
     # Override groundwater level with our prediction
     result["groundwater_level"] = groundwater_level
+    
+    # Add aquifer information to the result
+    result["aquifer_info"] = aquifer_info
     
     return {
         "potential_harvest": result["potential_harvest"],
@@ -120,6 +129,7 @@ def _run_prediction(data: AssessmentInput):
         "recommended_structures": result["recommended_structures"],
         "rainfall_distribution": result["rainfall_distribution"],
         "groundwater_level": groundwater_level,
+        "aquifer_info": aquifer_info,
     }
 
 
@@ -167,6 +177,31 @@ def get_district_stats(state: str, district: str):
         return stats
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching district statistics: {str(e)}")
+
+
+class AquiferInput(BaseModel):
+    latitude: float
+    longitude: float
+
+
+@app.post("/aquifer-info")
+def get_aquifer_info(data: AquiferInput):
+    """Get nearest aquifer information for given coordinates"""
+    try:
+        result = get_nearest_aquifer_info(data.latitude, data.longitude)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching aquifer information: {str(e)}")
+
+
+@app.get("/aquifer-info/{latitude}/{longitude}")
+def get_aquifer_info_get(latitude: float, longitude: float):
+    """Get nearest aquifer information for given coordinates (GET endpoint)"""
+    try:
+        result = get_nearest_aquifer_info(latitude, longitude)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching aquifer information: {str(e)}")
 
 
 # ✅ Accept both GET and HEAD for uptime monitors

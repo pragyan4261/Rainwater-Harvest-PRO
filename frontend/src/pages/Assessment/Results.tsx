@@ -33,6 +33,34 @@ interface AssessmentData {
   groundwaterLevel: number;
   latitude?: number;
   longitude?: number;
+  aquiferInfo?: {
+    success: boolean;
+    nearest_aquifer?: {
+      name: string;
+      state: string;
+      latitude: number;
+      longitude: number;
+      type: string;
+      depth_range: string;
+      quality: string;
+      recharge_potential: string;
+      distance_km: number;
+    };
+    distance_km?: number;
+    aquifer_type?: string;
+    recharge_potential?: string;
+    recommendations?: string[];
+    feasibility_score?: number;
+    overall_assessment?: string;
+    statistics?: {
+      average_distance: number;
+      nearest_distance: number;
+      most_common_type: string;
+      recharge_potential_summary: string;
+      total_nearby_aquifers: number;
+    };
+    error?: string;
+  };
   costEstimation: {
     storageTank: number;
     rechargePit: number;
@@ -228,14 +256,14 @@ const AssessmentResults: React.FC = () => {
         {/* Enhanced Hero Section */}
         <div className={styles.heroSection}>
           <div className={styles.heroContent}>
-            <div className="flex justify-between items-start mb-4">
+            <div className={`flex justify-between items-start mb-4 ${styles.heroHeaderActions}`}>
               <div>
                 <h1 className="text-3xl font-bold mb-2">Assessment Results</h1>
                 <p className="opacity-90 text-lg">
                   My Home Assessment • {new Date().toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex space-x-3">
+              <div className={`flex  space-x-3  ${styles.heroActionButtons}`}>
                 <Button 
                   variant="outline" 
                   icon={<ShareIcon size={18} />}
@@ -649,6 +677,157 @@ const AssessmentResults: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Aquifer Information Section */}
+            {data?.aquiferInfo && data.aquiferInfo.success && (
+              <div className={styles.sectionCard}>
+                <div className={styles.sectionHeader}>
+                  <div className={styles.sectionIcon}>
+                    <DropletIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className={styles.sectionTitle}>Nearest Major Aquifer</h3>
+                    <p className={styles.sectionSubtitle}>Regional groundwater resources analysis</p>
+                  </div>
+                </div>
+                
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Aquifer Details */}
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-blue-900 text-lg mb-2">
+                          {data.aquiferInfo.nearest_aquifer?.name || 'Unknown Aquifer'}
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Distance:</span>
+                            <span className="font-semibold text-blue-700">
+                              {data.aquiferInfo.distance_km || data.aquiferInfo.nearest_aquifer?.distance_km || 'N/A'} km
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Type:</span>
+                            <span className="font-medium text-gray-800">
+                              {data.aquiferInfo.aquifer_type || data.aquiferInfo.nearest_aquifer?.type || 'Unknown'}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Depth Range:</span>
+                            <span className="font-medium text-gray-800">
+                              {data.aquiferInfo.nearest_aquifer?.depth_range || 'N/A'}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Water Quality:</span>
+                            <span className={`font-medium ${
+                              data.aquiferInfo.nearest_aquifer?.quality === 'Good' ? 'text-green-600' :
+                              data.aquiferInfo.nearest_aquifer?.quality === 'Moderate' ? 'text-yellow-600' :
+                              'text-red-600'
+                            }`}>
+                              {data.aquiferInfo.nearest_aquifer?.quality || 'Unknown'}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600">Recharge Potential:</span>
+                            <span className={`font-semibold px-2 py-1 rounded-full text-xs ${
+                              data.aquiferInfo.recharge_potential === 'High' ? 'bg-green-100 text-green-700' :
+                              data.aquiferInfo.recharge_potential === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {data.aquiferInfo.recharge_potential || data.aquiferInfo.nearest_aquifer?.recharge_potential || 'Unknown'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Assessment & Statistics */}
+                    <div className="space-y-4">
+                      {data.aquiferInfo.feasibility_score !== undefined && (
+                        <div>
+                          <h4 className="font-semibold text-gray-800 mb-2">Aquifer Feasibility Assessment</h4>
+                          <div className="relative">
+                            <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                              <div 
+                                className={`bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-1000 ${styles.aquiferFeasibilityBar}`}
+                                style={{"--feasibility-width": `${data.aquiferInfo.feasibility_score}%`} as React.CSSProperties}
+                              ></div>
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-600">
+                              <span>Poor</span>
+                              <span className="font-semibold text-blue-700">
+                                {data.aquiferInfo.feasibility_score}/100
+                              </span>
+                              <span>Excellent</span>
+                            </div>
+                          </div>
+                          <p className="text-sm font-medium text-blue-700 mt-2">
+                            {data.aquiferInfo.overall_assessment}
+                          </p>
+                        </div>
+                      )}
+
+                      {data.aquiferInfo.statistics && (
+                        <div>
+                          <h4 className="font-semibold text-gray-800 mb-2">Regional Statistics</h4>
+                          <div className="space-y-1 text-xs text-gray-600">
+                            <div className="flex justify-between">
+                              <span>Nearby Aquifers:</span>
+                              <span className="font-medium">{data.aquiferInfo.statistics.total_nearby_aquifers}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Avg Distance:</span>
+                              <span className="font-medium">{data.aquiferInfo.statistics.average_distance} km</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Common Type:</span>
+                              <span className="font-medium">{data.aquiferInfo.statistics.most_common_type}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Recommendations */}
+                  {data.aquiferInfo.recommendations && data.aquiferInfo.recommendations.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-blue-200">
+                      <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                        <AlertCircleIcon className="w-4 h-4 mr-2" />
+                        Aquifer-Based Recommendations
+                      </h4>
+                      <div className="space-y-2">
+                        {data.aquiferInfo.recommendations.map((recommendation, index) => (
+                          <div key={index} className="flex items-start space-x-2 text-sm">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                            <span className="text-blue-800">{recommendation}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Coordinates Display */}
+                  {data.aquiferInfo.nearest_aquifer && (
+                    <div className="mt-4 pt-4 border-t border-blue-200">
+                      <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
+                        <div>
+                          <span className="font-medium">Aquifer Location:</span>
+                          <div className="font-mono text-blue-700">
+                            {data.aquiferInfo.nearest_aquifer.latitude.toFixed(4)}°N, {data.aquiferInfo.nearest_aquifer.longitude.toFixed(4)}°E
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium">State:</span>
+                          <div className="text-gray-800">{data.aquiferInfo.nearest_aquifer.state}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ===== RIGHT SECTION ===== */}

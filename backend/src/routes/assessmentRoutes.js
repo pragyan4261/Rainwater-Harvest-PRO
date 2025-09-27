@@ -129,6 +129,7 @@ router.get("/latest", auth, async (req, res) => {
       recommendedStructures: mlData.recommended_structures || [],
       rainfallDistribution: mlData.rainfall_distribution || Array(12).fill(0),
       groundwaterLevel: mlData.groundwater_level || 0,
+      aquiferInfo: mlData.aquifer_info || null,  // Add aquifer information
       currency: 'INR',  // Overall currency indicator
       modelVersion: 'ML_trained_indian_data'  // Indicate we're using ML model
     });
