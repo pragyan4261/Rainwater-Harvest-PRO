@@ -853,9 +853,9 @@ const Dashboard: React.FC = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-4 border-blue-500 border-t-transparent mb-3 sm:mb-4"></div>
-                <div className="text-sm sm:text-lg font-medium">Loading weather forecast...</div>
-                <div className="text-xs sm:text-sm mt-1 sm:mt-2">Fetching 24-hour weather Data</div>
+                <CloudRainIcon className="h-12 w-12 sm:h-16 sm:w-16 mb-3 sm:mb-4 text-gray-300" />
+                <div className="text-sm sm:text-lg font-medium text-gray-600">Search any location for analysis</div>
+                <div className="text-xs sm:text-sm mt-1 sm:mt-2 text-center">Enter a city name or use your location to view 24-hour weather forecast</div>
               </div>
             )}
           </div>
@@ -993,8 +993,9 @@ const Dashboard: React.FC = () => {
 
             {!rainfallChartData && (
               <div className={`flex flex-col items-center justify-center py-8 text-gray-400 ${styles.fadeInUp}`}>
-                <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
-                <div className="text-lg font-medium">Loading statistics...</div>
+                <CloudRainIcon className="h-12 w-12 mb-4 text-gray-300" />
+                <div className="text-lg font-medium text-gray-600">Search any location for statistics</div>
+                <div className="text-sm mt-2 text-center text-gray-500">Weather statistics will appear here after searching for a location</div>
               </div>
             )}
           </div>
