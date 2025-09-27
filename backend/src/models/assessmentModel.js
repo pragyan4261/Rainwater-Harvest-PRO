@@ -16,6 +16,8 @@ const assessmentSchema = new mongoose.Schema(
     roofType: String,
     soilType: String,
     address: String,
+    state: String,
+    district: String,
     latitude: String,
     longitude: String,
     rainfall: String,

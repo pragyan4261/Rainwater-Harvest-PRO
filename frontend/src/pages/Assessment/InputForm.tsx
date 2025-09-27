@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   HomeIcon,
@@ -7,6 +7,7 @@ import {
   UsersIcon,
   UploadCloudIcon,
   CheckCircleIcon,
+  LocateIcon,
 } from "lucide-react";
 import MainLayout from "../../layouts/MainLayout";
 import Card from "../../components/ui/Card";
@@ -14,11 +15,18 @@ import Input from "../../components/ui/Input";
 import Dropdown from "../../components/ui/Dropdown";
 import Button from "../../components/ui/Button";
 import { useTranslation } from "react-i18next";
+import { locationService, type StateDistrict } from "../../services/locationService";
 
 const AssessmentInput: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
+
+  // States and districts data
+  const [statesDistricts, setStatesDistricts] = useState<StateDistrict>({});
+  const [availableDistricts, setAvailableDistricts] = useState<string[]>([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   // form data state
   const [formData, setFormData] = useState({
@@ -31,6 +39,8 @@ const AssessmentInput: React.FC = () => {
     roofType: "",
     soilType: "",
     address: "",
+    state: "",
+    district: "",
     latitude: "",
     longitude: "",
     rainfall: "",
@@ -52,6 +62,88 @@ const AssessmentInput: React.FC = () => {
     { value: "peaty", label: t("assessment.soilTypes.peaty") },
     { value: "chalky", label: t("assessment.soilTypes.chalky") },
   ];
+
+  // Load states and districts on component mount
+  useEffect(() => {
+    const loadStatesDistricts = async () => {
+      try {
+        const data = await locationService.getStatesDistricts();
+        setStatesDistricts(data);
+      } catch (error) {
+        console.error("Failed to load states and districts:", error);
+      }
+    };
+    loadStatesDistricts();
+  }, []);
+
+  // Update available districts when state changes
+  useEffect(() => {
+    if (formData.state && statesDistricts[formData.state]) {
+      setAvailableDistricts(statesDistricts[formData.state].districts);
+      // Reset district when state changes
+      if (formData.district && !statesDistricts[formData.state].districts.includes(formData.district)) {
+        setFormData(prev => ({ ...prev, district: "" }));
+      }
+    } else {
+      setAvailableDistricts([]);
+    }
+  }, [formData.state, statesDistricts]);
+
+  // Create dropdown options for states
+  const stateOptions = Object.keys(statesDistricts).map(stateName => ({
+    value: stateName,
+    label: stateName
+  }));
+
+  // Create dropdown options for districts
+  const districtOptions = availableDistricts.map(district => ({
+    value: district,
+    label: district
+  }));
+
+  // Get current location using browser's Geolocation API
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by this browser");
+      return;
+    }
+
+    setLocationLoading(true);
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setFormData(prev => ({
+          ...prev,
+          latitude: latitude.toFixed(6),
+          longitude: longitude.toFixed(6)
+        }));
+        setLocationLoading(false);
+      },
+      (error) => {
+        let errorMessage = "Failed to get location";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied by user";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out";
+            break;
+        }
+        setLocationError(errorMessage);
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
 
 
   // Validation logic for each step
@@ -75,6 +167,8 @@ const AssessmentInput: React.FC = () => {
     if (currentStep === 3) {
       return (
         formData.address.trim() &&
+        formData.state.trim() &&
+        formData.district.trim() &&
         formData.latitude.trim() &&
         formData.longitude.trim() &&
         formData.rainfall.trim()
@@ -173,6 +267,7 @@ const AssessmentInput: React.FC = () => {
               {t("assessment.basicInfo.heading")}
             </h2>
             <Input
+              name="name"
               label={t("assessment.basicInfo.name")}
               placeholder={t("assessment.basicInfo.namePlaceholder")}
               required
@@ -182,6 +277,7 @@ const AssessmentInput: React.FC = () => {
               }
             />
             <Input
+              name="dwellers"
               label={t("assessment.basicInfo.dwellers")}
               type="number"
               placeholder={t("assessment.basicInfo.dwellersPlaceholder")}
@@ -193,6 +289,7 @@ const AssessmentInput: React.FC = () => {
               }
             />
             <Input
+              name="phone"
               label={t("assessment.basicInfo.phone")}
               type="tel"
               placeholder={t("assessment.basicInfo.phonePlaceholder")}
@@ -203,6 +300,7 @@ const AssessmentInput: React.FC = () => {
               }
             />
             <Input
+              name="email"
               label={t("assessment.basicInfo.email")}
               type="email"
               placeholder={t("assessment.basicInfo.emailPlaceholder")}
@@ -222,6 +320,7 @@ const AssessmentInput: React.FC = () => {
               {t("assessment.propertyDetails.heading")}
             </h2>
             <Input
+              name="roofArea"
               label={t("assessment.propertyDetails.roofArea")}
               type="number"
               placeholder={t("assessment.propertyDetails.roofAreaPlaceholder")}
@@ -233,6 +332,7 @@ const AssessmentInput: React.FC = () => {
               }
             />
             <Input
+              name="openSpace"
               label={t("assessment.propertyDetails.openSpace")}
               type="number"
               placeholder={t("assessment.propertyDetails.openSpacePlaceholder")}
@@ -289,6 +389,7 @@ const AssessmentInput: React.FC = () => {
               {t("assessment.locationDetails.heading")}
             </h2>
             <Input
+              name="address"
               label={t("assessment.locationDetails.address")}
               placeholder={t("assessment.locationDetails.addressPlaceholder")}
               icon={<MapPinIcon size={18} />}
@@ -298,8 +399,34 @@ const AssessmentInput: React.FC = () => {
                 setFormData({ ...formData, address: e.target.value })
               }
             />
+            
+            {/* State and District Selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Dropdown
+                label="State"
+                options={stateOptions}
+                placeholder="Select your state"
+                required
+                value={formData.state}
+                onChange={(val) =>
+                  setFormData({ ...formData, state: val as string })
+                }
+              />
+              <Dropdown
+                label="District"
+                options={districtOptions}
+                placeholder="Select your district"
+                required
+                value={formData.district}
+                onChange={(val) =>
+                  setFormData({ ...formData, district: val as string })
+                }
+              />
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <Input
+                name="latitude"
                 label={t("assessment.locationDetails.latitude")}
                 placeholder={t("assessment.locationDetails.latitudePlaceholder")}
                 required
@@ -309,6 +436,7 @@ const AssessmentInput: React.FC = () => {
                 }
               />
               <Input
+                name="longitude"
                 label={t("assessment.locationDetails.longitude")}
                 placeholder={t("assessment.locationDetails.longitudePlaceholder")}
                 required
@@ -318,7 +446,37 @@ const AssessmentInput: React.FC = () => {
                 }
               />
             </div>
+            
+            {/* Get Current Location Button */}
+            <div className="mb-4">
+              <Button
+                variant="outline"
+                onClick={getCurrentLocation}
+                disabled={locationLoading}
+                icon={<LocateIcon size={16} />}
+              >
+                {locationLoading ? "Getting Location..." : "Use Current Location"}
+              </Button>
+              
+              {locationError && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">⚠️ {locationError}</p>
+                  <p className="text-xs text-red-500 mt-1">
+                    Please enable location permissions or enter coordinates manually.
+                  </p>
+                </div>
+              )}
+              
+              {formData.latitude && formData.longitude && !locationLoading && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                  <p className="text-sm text-green-600">
+                    📍 Location detected: {parseFloat(formData.latitude).toFixed(4)}°, {parseFloat(formData.longitude).toFixed(4)}°
+                  </p>
+                </div>
+              )}
+            </div>
             <Input
+              name="rainfall"
               label={t("assessment.locationDetails.rainfall")}
               type="number"
               placeholder={t("assessment.locationDetails.rainfallPlaceholder")}

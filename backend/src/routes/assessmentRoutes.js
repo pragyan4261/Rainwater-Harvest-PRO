@@ -78,6 +78,10 @@ router.get("/latest", auth, async (req, res) => {
           annual_rainfall: assessment.rainfall,
           roof_type: assessment.roofType,
           soil_type: assessment.soilType,
+          state: assessment.state,
+          district: assessment.district,
+          latitude: assessment.latitude ? parseFloat(assessment.latitude) : null,
+          longitude: assessment.longitude ? parseFloat(assessment.longitude) : null,
         }),
         signal: controller.signal
       });
@@ -102,6 +106,8 @@ router.get("/latest", auth, async (req, res) => {
       tankVolume: mlData.tank_volume || 0,
       efficiency: mlData.efficiency || 0,
       inertia: mlData.inertia || 0,
+      latitude: assessment.latitude ? parseFloat(assessment.latitude) : undefined,
+      longitude: assessment.longitude ? parseFloat(assessment.longitude) : undefined,
       costEstimation: {
         storageTank: mlData.cost_estimation?.storage_tank || 0,
         rechargePit: mlData.cost_estimation?.recharge_pit || 0,

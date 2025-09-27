@@ -16,6 +16,7 @@ import {
 import MainLayout from "../../layouts/MainLayout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
+import { weatherService, type WeatherData } from "../../services/weatherService";
 
 interface AssessmentData {
   feasibility: string;
@@ -29,6 +30,8 @@ interface AssessmentData {
   recommendedStructures: { name: string; description: string }[];
   rainfallDistribution: number[]; // [12 months]
   groundwaterLevel: number;
+  latitude?: number;
+  longitude?: number;
   costEstimation: {
     storageTank: number;
     rechargePit: number;
@@ -55,12 +58,14 @@ const AssessmentResults: React.FC = () => {
   const [data, setData] = useState<AssessmentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-  const response = await fetch("/api/assessments/latest", {
+        const response = await fetch("/api/assessments/latest", {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -71,6 +76,23 @@ const AssessmentResults: React.FC = () => {
         }
         const result = await response.json();
         setData(result);
+        
+        // Fetch weather data if coordinates are available
+        if (result.latitude && result.longitude) {
+          try {
+            setWeatherLoading(true);
+            const weather = await weatherService.getWeatherData(
+              parseFloat(result.latitude),
+              parseFloat(result.longitude)
+            );
+            setWeatherData(weather);
+          } catch (weatherError) {
+            console.error("Failed to fetch weather data:", weatherError);
+            // Continue without weather data - fallback to original rainfall chart
+          } finally {
+            setWeatherLoading(false);
+          }
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Something went wrong';
         setError(message);
@@ -207,40 +229,240 @@ const AssessmentResults: React.FC = () => {
               )}
             </div>
 
-            {/* Rainfall chart */}
-            <h3 className="font-semibold text-lg mb-3">Rainfall Distribution</h3>
-            <div className="bg-gray-50 rounded-lg p-4 h-64 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium">{t('results.monthlyPrecipitation')}</h4>
-                <span className="text-sm text-gray-500">{t('results.mmPerMonth')}</span>
+            {/* Live Weather Data & Rainfall Distribution */}
+            <h3 className="font-semibold text-lg mb-3">
+              {weatherData ? "Live Weather Data & Rainfall Distribution" : "Rainfall Distribution"}
+            </h3>
+            
+            {weatherLoading && (
+              <div className="bg-blue-50 rounded-lg p-4 mb-6 text-center">
+                <p className="text-blue-600">🌦️ Loading live weather data...</p>
               </div>
-              <div className="relative h-48">
-                <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around h-40">
-                  {data?.rainfallDistribution?.length ? (
-                    data.rainfallDistribution.map((value, i) => (
-                      <div key={i} className="flex flex-col items-center">
-                        <div
-                          className="w-6 bg-blue-500 rounded-t-sm transition-all hover:bg-blue-600"
-                          style={{ height: `${(value / 180) * 100}%` }}
-                        ></div>
-                        <span className="text-xs mt-1 text-gray-600">
-                          {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][i]}
+            )}
+            
+            {weatherData ? (
+              <div className="space-y-6 mb-6">
+                {/* Current Weather Conditions */}
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6">
+                  <h4 className="font-medium mb-4">Current Weather Conditions</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-700">
+                        {weatherData.current.temperature_2m.toFixed(1)}°C
+                      </div>
+                      <div className="text-sm text-gray-600">Temperature</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-cyan-700">
+                        {weatherData.current.rain.toFixed(1)} mm
+                      </div>
+                      <div className="text-sm text-gray-600">Current Rain</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-700">
+                        {weatherData.current.cloud_cover.toFixed(0)}%
+                      </div>
+                      <div className="text-sm text-gray-600">Cloud Cover</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-700">
+                        {weatherData.current.precipitation.toFixed(1)} mm
+                      </div>
+                      <div className="text-sm text-gray-600">Precipitation</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 7-Day Rainfall Chart */}
+                <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl border border-blue-100 shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-blue-100 p-2 rounded-lg">
+                        <CloudRainIcon className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-800">7-Day Rainfall Distribution</h4>
+                        <p className="text-xs text-gray-500">Live weather data for your location</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-700">Total</div>
+                      <div className="text-lg font-bold text-blue-600">
+                        {weatherData.daily.rain_sum && weatherService.getWeeklyRainfall(weatherData.daily.rain_sum).reduce((sum, val) => sum + val, 0).toFixed(1)} mm
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Enhanced Chart Container */}
+                  <div className="relative h-64 bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-4">
+                    {/* Grid Lines */}
+                    <div className="absolute inset-4 flex flex-col justify-between pointer-events-none">
+                      {[0, 25, 50, 75, 100].map((percent) => (
+                        <div key={percent} className="h-px bg-gray-200 opacity-40"></div>
+                      ))}
+                    </div>
+                    
+                    {/* Y-Axis Labels */}
+                    <div className="absolute left-0 top-4 bottom-12 flex flex-col justify-between text-xs text-gray-400">
+                      {weatherData.daily.rain_sum && (() => {
+                        const weeklyData = weatherService.getWeeklyRainfall(weatherData.daily.rain_sum);
+                        const maxRain = Math.max(...weeklyData);
+                        return [maxRain, maxRain * 0.75, maxRain * 0.5, maxRain * 0.25, 0].map((val, i) => (
+                          <span key={i} className="leading-none">
+                            {val.toFixed(1)}
+                          </span>
+                        ));
+                      })()}
+                    </div>
+                    
+                    {/* Chart Bars */}
+                    <div className="absolute bottom-12 left-8 right-4 flex items-end justify-around h-44">
+                      {weatherData.daily.rain_sum && weatherService.getWeeklyRainfall(weatherData.daily.rain_sum).map((rainfall, i) => {
+                        const weeklyData = weatherService.getWeeklyRainfall(weatherData.daily.rain_sum || new Float32Array());
+                        const maxRain = Math.max(...weeklyData);
+                        const height = maxRain > 0 ? (rainfall / maxRain) * 100 : 0;
+                        const date = new Date();
+                        date.setDate(date.getDate() - (6 - i));
+                        const isToday = i === 6;
+                        const isHighRain = rainfall > maxRain * 0.7;
+                        
+                        return (
+                          <div key={i} className="flex flex-col items-center group cursor-pointer transform hover:scale-110 transition-all duration-300">
+                            {/* Tooltip */}
+                            <div className="absolute -top-16 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                              <div className="font-semibold">{rainfall.toFixed(1)} mm</div>
+                              <div className="text-gray-300">
+                                {date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                              </div>
+                              <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+                                <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            </div>
+                            
+                            {/* Bar */}
+                            <div className="relative">
+                              <div
+                                className={`w-10 rounded-t-lg shadow-lg transition-all duration-500 ease-out relative ${
+                                  isToday 
+                                    ? 'bg-gradient-to-t from-orange-500 to-orange-300 ring-2 ring-orange-200' 
+                                    : isHighRain
+                                      ? 'bg-gradient-to-t from-blue-700 to-blue-500'
+                                      : rainfall > 0
+                                        ? 'bg-gradient-to-t from-blue-600 to-blue-400'
+                                        : 'bg-gradient-to-t from-gray-300 to-gray-200'
+                                } group-hover:shadow-xl`}
+                                style={{ 
+                                  height: `${Math.max(height, rainfall > 0 ? 4 : 0)}%`
+                                } as React.CSSProperties}
+                              >
+                                {/* Rain drop animation for active bars */}
+                                {rainfall > 0 && (
+                                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1">
+                                    <div className="w-1 h-1 bg-white rounded-full animate-pulse"></div>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Value label on hover */}
+                              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-2 py-1 rounded shadow-md text-xs font-semibold whitespace-nowrap">
+                                {rainfall.toFixed(1)}mm
+                              </div>
+                            </div>
+                            
+                            {/* Date Labels */}
+                            <div className="mt-3 text-center">
+                              <div className={`text-xs font-medium ${isToday ? 'text-orange-600' : 'text-gray-600'}`}>
+                                {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                              </div>
+                              <div className={`text-xs ${isToday ? 'text-orange-500 font-medium' : 'text-gray-400'}`}>
+                                {date.getDate()}/{date.getMonth() + 1}
+                              </div>
+                              {isToday && (
+                                <div className="text-xs text-orange-600 font-semibold">Today</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Enhanced Footer with Statistics */}
+                  <div className="mt-6 flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-gradient-to-t from-blue-600 to-blue-400 rounded-sm"></div>
+                        <span className="text-gray-600">Regular rain</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-gradient-to-t from-blue-700 to-blue-500 rounded-sm"></div>
+                        <span className="text-gray-600">Heavy rain</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-gradient-to-t from-orange-500 to-orange-300 rounded-sm"></div>
+                        <span className="text-gray-600">Today</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3 text-gray-500">
+                      <span>📊 Avg: {weatherData.daily.rain_sum && (weatherService.getWeeklyRainfall(weatherData.daily.rain_sum).reduce((sum, val) => sum + val, 0) / 7).toFixed(1)} mm/day</span>
+                      <span>•</span>
+                      <span>🌐 Open-Meteo API</span>
+                    </div>
+                  </div>
+                  
+                  {/* Rain Status Indicator */}
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 rounded-full ${
+                          weatherData.current.rain > 0 ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'
+                        }`}></div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {weatherData.current.rain > 0 ? '🌧️ Currently Raining' : '☀️ No Current Rain'}
                         </span>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500">No rainfall data</p>
-                  )}
+                      <div className="text-sm text-blue-600 font-semibold">
+                        {weatherData.current.rain.toFixed(1)} mm/h
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              // Fallback to original rainfall distribution
+              <div className="bg-gray-50 rounded-lg p-4 h-64 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-medium">{t('results.monthlyPrecipitation')}</h4>
+                  <span className="text-sm text-gray-500">{t('results.mmPerMonth')}</span>
+                </div>
+                <div className="relative h-48">
+                  <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around h-40">
+                    {data?.rainfallDistribution?.length ? (
+                      data.rainfallDistribution.map((value, i) => (
+                        <div key={i} className="flex flex-col items-center">
+                          <div
+                            className="w-6 bg-blue-500 rounded-t-sm transition-all hover:bg-blue-600"
+                            style={{ height: `${(value / 180) * 100}%` } as React.CSSProperties}
+                          ></div>
+                          <span className="text-xs mt-1 text-gray-600">
+                            {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][i]}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">No rainfall data</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Groundwater */}
-            <h3 className="font-semibold text-lg mb-3">Groundwater Level</h3>
+            <h3 className="font-semibold text-lg mb-3">Groundwater Level Prediction</h3>
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500">{t('results.surface')}</span>
-                <span className="text-sm text-gray-500">{t('results.depth')}</span>
+                <span className="text-sm text-gray-500">Surface Level</span>
+                <span className="text-sm text-gray-500">Predicted Depth</span>
               </div>
               <div className="relative h-16 bg-gradient-to-b from-blue-100 to-blue-300 rounded-md">
                 <div className="absolute left-0 right-0 top-1/2 border-t-2 border-dashed border-blue-600"></div>
@@ -248,10 +470,23 @@ const AssessmentResults: React.FC = () => {
                   {data?.groundwaterLevel || 0}m
                 </div>
               </div>
-              <p className="mt-2 text-sm text-gray-600">
-                The groundwater level in your area is at {data?.groundwaterLevel || 0}m
-                depth, which is suitable for recharge structures.
-              </p>
+              <div className="mt-3 space-y-1">
+                <p className="text-sm text-gray-600">
+                  The <strong>groundwater level</strong> in your area is at <span className="font-semibold text-blue-600">{data?.groundwaterLevel || 0}m</span> depth.
+                </p>
+                <p className="text-xs text-gray-500">
+                  Prediction based on historical data from your district. This depth is {(data?.groundwaterLevel || 0) < 10 ? 'suitable' : 'challenging'} for recharge structures.
+                </p>
+                {data?.groundwaterLevel && data.groundwaterLevel > 0 && (
+                  <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                    💧 <strong>Recommendation:</strong> {
+                      data.groundwaterLevel < 5 ? 'Shallow groundwater - ideal for recharge pits' :
+                      data.groundwaterLevel < 10 ? 'Moderate depth - recharge wells recommended' :
+                      'Deep groundwater - consider bore well recharge systems'
+                    }
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
         </div>

@@ -5,10 +5,11 @@ from datetime import datetime, timezone
 from typing import Optional
 
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import k_means_v3
+from groundwater_predictor import groundwater_predictor
 
 
 SELF_PING_URL = (os.environ.get("SELF_PING_URL") or os.environ.get("RENDER_EXTERNAL_URL") or "").rstrip("/")
@@ -72,15 +73,41 @@ class AssessmentInput(BaseModel):
     roof_type: str
     soil_type: str
     annual_rainfall: float
+    state: Optional[str] = None
+    district: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+
+
+class GroundwaterInput(BaseModel):
+    state: str
+    district: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 def _run_prediction(data: AssessmentInput):
+    # Get groundwater level prediction if state and district are provided
+    groundwater_level = 10.0  # Default
+    if data.state and data.district:
+        gw_result = groundwater_predictor.predict_groundwater_level(
+            state=data.state,
+            district=data.district,
+            latitude=data.latitude,
+            longitude=data.longitude
+        )
+        groundwater_level = gw_result.get('groundwater_level', 10.0)
+    
     result = k_means_v3.predict_harvest(
         roof_area=data.roof_area,
         roof_type=data.roof_type,
         soil_type=data.soil_type,
         rainfall=data.annual_rainfall,
     )
+    
+    # Override groundwater level with our prediction
+    result["groundwater_level"] = groundwater_level
+    
     return {
         "potential_harvest": result["potential_harvest"],
         "tank_volume": result["tank_volume"],
@@ -92,7 +119,7 @@ def _run_prediction(data: AssessmentInput):
         "feasibility_description": result["feasibility_description"],
         "recommended_structures": result["recommended_structures"],
         "rainfall_distribution": result["rainfall_distribution"],
-        "groundwater_level": result["groundwater_level"],
+        "groundwater_level": groundwater_level,
     }
 
 
@@ -104,6 +131,42 @@ def predict(data: AssessmentInput):
 @app.post("/calculate")
 def calculate(data: AssessmentInput):
     return _run_prediction(data)
+
+
+@app.get("/states-districts")
+def get_states_districts():
+    """Get list of all states and their districts"""
+    try:
+        return groundwater_predictor.get_states_districts()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching states and districts: {str(e)}")
+
+
+@app.post("/groundwater")
+def predict_groundwater(data: GroundwaterInput):
+    """Predict groundwater level for a specific state and district"""
+    try:
+        result = groundwater_predictor.predict_groundwater_level(
+            state=data.state,
+            district=data.district,
+            latitude=data.latitude,
+            longitude=data.longitude
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error predicting groundwater level: {str(e)}")
+
+
+@app.get("/district-stats/{state}/{district}")
+def get_district_stats(state: str, district: str):
+    """Get historical statistics for a district"""
+    try:
+        stats = groundwater_predictor.get_district_statistics(state, district)
+        if not stats:
+            raise HTTPException(status_code=404, detail="District not found or no data available")
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching district statistics: {str(e)}")
 
 
 # ✅ Accept both GET and HEAD for uptime monitors

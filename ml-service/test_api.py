@@ -10,14 +10,18 @@ def test_ml_api():
     """Test the ML API endpoints"""
     
     # API endpoint (adjust port if needed)
-    base_url = "http://localhost:8001"  # Using port 8001 to avoid conflicts
+    base_url = "http://localhost:8000"  # Changed back to port 8000
     
-    # Test data
+    # Test data with new fields
     test_payload = {
         "roof_area": 150,
         "roof_type": "RCC",
         "soil_type": "loam",
-        "annual_rainfall": 1000
+        "annual_rainfall": 1000,
+        "state": "Karnataka",
+        "district": "Tumkur",
+        "latitude": 13.75,
+        "longitude": 77.22
     }
     
     print("Testing ML Service API")
@@ -96,5 +100,51 @@ def test_ml_api():
     except:
         print("\n❌ Health Check Failed: Connection error")
 
+def test_new_endpoints():
+    """Test the new groundwater and states-districts endpoints"""
+    base_url = "http://localhost:8000"
+    
+    print("\n" + "=" * 50)
+    print("Testing New Groundwater Endpoints")
+    print("=" * 50)
+    
+    # Test states-districts endpoint
+    try:
+        response = requests.get(f"{base_url}/states-districts", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            print(f"✅ States-Districts endpoint working. Found {len(data)} states")
+            # Show first few states
+            for i, (state, info) in enumerate(list(data.items())[:3]):
+                print(f"   {state}: {len(info['districts'])} districts")
+        else:
+            print(f"❌ States-Districts endpoint failed: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Error testing states-districts: {e}")
+    
+    # Test groundwater prediction endpoint
+    try:
+        test_data = {
+            "state": "Karnataka",
+            "district": "Tumkur",
+            "latitude": 13.75,
+            "longitude": 77.22
+        }
+        
+        response = requests.post(f"{base_url}/groundwater", json=test_data, timeout=10)
+        if response.status_code == 200:
+            result = response.json()
+            print(f"✅ Groundwater prediction working")
+            print(f"   Predicted depth: {result['groundwater_level']}m")
+            print(f"   Confidence: {result['confidence']}")
+            print(f"   Status: {result['status']}")
+            if 'metadata' in result:
+                print(f"   Model version: {result['metadata'].get('model_version', 'N/A')}")
+        else:
+            print(f"❌ Groundwater prediction failed: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Error testing groundwater prediction: {e}")
+
 if __name__ == "__main__":
     test_ml_api()
+    test_new_endpoints()
