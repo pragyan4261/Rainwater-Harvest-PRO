@@ -16,7 +16,6 @@ import {
 import MainLayout from "../../layouts/MainLayout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import AssessmentLoader from "../../components/ui/AssessmentLoader";
 import { weatherService, type WeatherData } from "../../services/weatherService";
 
 interface AssessmentData {
