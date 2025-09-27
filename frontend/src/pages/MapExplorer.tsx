@@ -157,30 +157,6 @@ const MapExplorer: React.FC = () => {
     precipitationLayerRef.current = precipitationLayer;
   };
 
-  // Custom layer control names with icons
-  useEffect(() => {
-    const updateLayerControlNames = () => {
-      setTimeout(() => {
-        const layerControls = document.querySelectorAll('.leaflet-control-layers-base label span');
-        if (layerControls.length >= 2) {
-          layerControls[0].textContent = '🗺️ Street Map';
-          layerControls[1].textContent = '🛰️ Satellite View';
-        }
-      }, 100);
-    };
-
-    updateLayerControlNames();
-    
-    // Also update when the map is ready
-    const map = mapRef.current;
-    if (map) {
-      map.on('layercontrolopen', updateLayerControlNames);
-      return () => {
-        map.off('layercontrolopen', updateLayerControlNames);
-      };
-    }
-  }, []);
-
   // Recalculate distance whenever points change
   useEffect(() => {
     if (measurePoints.length < 2) {
@@ -193,6 +169,17 @@ const MapExplorer: React.FC = () => {
     }
     setTotalDistance(d);
   }, [measurePoints]);
+
+  // Initialize map properly for layer control
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map) {
+      // Ensure the map is fully initialized
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+  }, []);
 
   // Handle map click while measuring
   useEffect(() => {
@@ -264,7 +251,7 @@ const MapExplorer: React.FC = () => {
           ref={mapRef}
         >
           {/* Measurement Controls (overlay) */}
-          <div className="absolute top-2 left-2 z-[1200] flex flex-col gap-2 bg-white/90 backdrop-blur px-3 py-2 rounded shadow pointer-events-auto text-xs sm:text-sm">
+          <div className="absolute top-2 left-2 z-[1100] flex flex-col gap-2 bg-white/90 backdrop-blur px-3 py-2 rounded shadow pointer-events-auto text-xs sm:text-sm max-w-[200px]">
             {!isMeasuring && (
               <button onClick={startMeasurement} className="px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-500">Start Measure</button>
             )}
@@ -341,17 +328,26 @@ const MapExplorer: React.FC = () => {
               )}
             </div>
           </div>
-          <LayersControl position="topright">
-            <BaseLayer checked name="Street Map">
+          <LayersControl position="topright" collapsed={true}>
+            <BaseLayer checked name="🗺️ Street Map">
               <TileLayer
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
               />
             </BaseLayer>
-            <BaseLayer name="Satellite View">
+            <BaseLayer name="🛰️ Satellite View">
               <TileLayer
-                attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
-                url="https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoic3dhcnVwMDMiLCJhIjoiY21mbW5iM3RrMDN0aDJqc2YzN3RuZnprNyJ9.ZaCqfiOSesJzbwsVF-I6FQ"
+                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                maxZoom={19}
+              />
+            </BaseLayer>
+            <BaseLayer name="🗺️ Terrain View">
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                maxZoom={17}
               />
             </BaseLayer>
           </LayersControl>
@@ -368,7 +364,7 @@ const MapExplorer: React.FC = () => {
             </Marker>
           ))}
           {/* Responsive controls at bottom for mobile */}
-          <div className="absolute bottom-0 left-0 w-full z-[1200] flex flex-col sm:flex-row sm:justify-between gap-2 p-4 pointer-events-auto">
+          <div className="absolute bottom-0 left-0 w-full z-[1100] flex flex-col sm:flex-row sm:justify-between gap-2 p-4 pointer-events-auto">
             <form
               onSubmit={handleSearch}
               className="flex-1 bg-white rounded-lg shadow-md p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
