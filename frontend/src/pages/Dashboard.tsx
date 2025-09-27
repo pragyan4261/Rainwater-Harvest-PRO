@@ -366,7 +366,7 @@ useEffect(() => {
             <div className="mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Live Weather Data for Your Location</h3>
               <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                Data from Open-Meteo API • Updated hourly • Based on your coordinates
+                 Updated hourly • Based on your coordinates
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
@@ -454,15 +454,12 @@ useEffect(() => {
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-emerald-700">{rainfallChartData.soil_moisture_0_to_1cm[0]?.toFixed(3) || 0}</div>
               </div>
             </div>
-            <div className="mt-3 sm:mt-4 text-xs text-gray-500 text-center">
-              Data timestamp: {rainfallChartData.time[0]?.toLocaleString() || 'Loading...'}
-            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-gray-400">
             <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-500 mb-3 sm:mb-4"></div>
             <div className="text-base sm:text-lg font-medium">Loading weather data...</div>
-            <div className="text-xs sm:text-sm mt-1 sm:mt-2">Fetching data from Open-Meteo API</div>
+            <div className="text-xs sm:text-sm mt-1 sm:mt-2">Fetching Weather Data</div>
           </div>
         )}
       </Card>
@@ -747,7 +744,7 @@ useEffect(() => {
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-4 border-blue-500 border-t-transparent mb-3 sm:mb-4"></div>
                 <div className="text-sm sm:text-lg font-medium">Loading weather forecast...</div>
-                <div className="text-xs sm:text-sm mt-1 sm:mt-2">Fetching 24-hour weather data from Open-Meteo API</div>
+                <div className="text-xs sm:text-sm mt-1 sm:mt-2">Fetching 24-hour weather Data</div>
               </div>
             )}
           </div>
