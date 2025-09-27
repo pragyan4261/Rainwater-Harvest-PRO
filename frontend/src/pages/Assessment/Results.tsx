@@ -263,7 +263,7 @@ const AssessmentResults: React.FC = () => {
                   My Home Assessment • {new Date().toLocaleDateString()}
                 </p>
               </div>
-              <div className={`flex  space-x-3  ${styles.heroActionButtons}`}>
+              <div className={`flex space-x-3 ${styles.heroActionButtons}`}>
                 <Button 
                   variant="outline" 
                   icon={<ShareIcon size={18} />}
