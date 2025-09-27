@@ -33,6 +33,7 @@ const Dashboard: React.FC = () => {
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
+  const [hasSearchedWeather, setHasSearchedWeather] = useState(false);
 
   // Rainfall chart data state
   const [rainfallChartData, setRainfallChartData] = useState<{
@@ -88,6 +89,7 @@ const Dashboard: React.FC = () => {
 
     setWeatherLoading(true);
     setWeatherError(null);
+    setHasSearchedWeather(true);
 
     try {
       // Get coordinates from city name using Nominatim
@@ -122,6 +124,7 @@ const Dashboard: React.FC = () => {
   const fetchWeatherByLocation = () => {
     setWeatherLoading(true);
     setWeatherError(null);
+    setHasSearchedWeather(true);
 
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
@@ -145,7 +148,7 @@ const Dashboard: React.FC = () => {
           setWeatherLoading(false);
         }
       },
-      (error) => {
+      () => {
         setWeatherLoading(false);
         setWeatherError('Location access denied. Please enable location services or search by city.');
       },
@@ -204,78 +207,8 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Fetch rainfall chart data for user's location on mount
-  useEffect(() => {
-    // Try to get user's location
-    console.log('Requesting geolocation...');
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords }) => {
-        console.log('Geolocation success:', coords.latitude, coords.longitude);
-        try {
-          await fetchRainfallData(coords.latitude, coords.longitude);
-        } catch (error) {
-          console.error('Error fetching rainfall data:', error);
-          // Create sample data with the new structure for testing if API fails
-          const now = new Date();
-          const sampleData = {
-            time: Array.from({ length: 24 }, (_, i) => new Date(now.getTime() + i * 60 * 60 * 1000)),
-            temperature_2m: Array.from({ length: 24 }, () => 20 + Math.random() * 15),
-            precipitation: Array.from({ length: 24 }, () => Math.random() * 5),
-            precipitation_probability: Array.from({ length: 24 }, () => Math.random() * 100),
-            rain: Array.from({ length: 24 }, () => Math.random() * 3),
-            showers: Array.from({ length: 24 }, () => Math.random() * 2),
-            weather_code: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-            relative_humidity_2m: Array.from({ length: 24 }, () => 40 + Math.random() * 40),
-            evapotranspiration: Array.from({ length: 24 }, () => Math.random() * 2),
-            cloud_cover_low: Array.from({ length: 24 }, () => Math.random() * 100),
-            cloud_cover_mid: Array.from({ length: 24 }, () => Math.random() * 100),
-            cloud_cover_high: Array.from({ length: 24 }, () => Math.random() * 100),
-            wind_speed_10m: Array.from({ length: 24 }, () => Math.random() * 20),
-            soil_temperature_0cm: Array.from({ length: 24 }, () => 15 + Math.random() * 20),
-            soil_moisture_0_to_1cm: Array.from({ length: 24 }, () => Math.random() * 0.5)
-          };
-          console.log('Using sample data:', sampleData);
-          setRainfallChartData(sampleData);
-        }
-      },
-      async (error) => {
-        console.warn('Geolocation error:', error);
-        // Fallback to Berlin coordinates (from your API example)
-        console.log('Using fallback location: Berlin');
-        try {
-          await fetchRainfallData(52.52, 13.41);
-        } catch (error) {
-          console.error('Error fetching fallback data:', error);
-          // Create sample data
-          const now = new Date();
-          const sampleData = {
-            time: Array.from({ length: 24 }, (_, i) => new Date(now.getTime() + i * 60 * 60 * 1000)),
-            temperature_2m: Array.from({ length: 24 }, () => 20 + Math.random() * 15),
-            precipitation: Array.from({ length: 24 }, () => Math.random() * 5),
-            precipitation_probability: Array.from({ length: 24 }, () => Math.random() * 100),
-            rain: Array.from({ length: 24 }, () => Math.random() * 3),
-            showers: Array.from({ length: 24 }, () => Math.random() * 2),
-            weather_code: Array.from({ length: 24 }, () => Math.floor(Math.random() * 100)),
-            relative_humidity_2m: Array.from({ length: 24 }, () => 40 + Math.random() * 40),
-            evapotranspiration: Array.from({ length: 24 }, () => Math.random() * 2),
-            cloud_cover_low: Array.from({ length: 24 }, () => Math.random() * 100),
-            cloud_cover_mid: Array.from({ length: 24 }, () => Math.random() * 100),
-            cloud_cover_high: Array.from({ length: 24 }, () => Math.random() * 100),
-            wind_speed_10m: Array.from({ length: 24 }, () => Math.random() * 20),
-            soil_temperature_0cm: Array.from({ length: 24 }, () => 15 + Math.random() * 20),
-            soil_moisture_0_to_1cm: Array.from({ length: 24 }, () => Math.random() * 0.5)
-          };
-          console.log('Using sample data:', sampleData);
-          setRainfallChartData(sampleData);
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 600000 // 10 minutes
-      }
-    );
-  }, []);
+  // Remove automatic weather data fetching on mount
+  // Weather data will only be fetched when user explicitly clicks search or location buttons
 
   const quickActions = [
     {
@@ -470,15 +403,16 @@ const Dashboard: React.FC = () => {
         )}
       </div>
 
-      <Card className="p-3 sm:p-4 md:p-6">
-        {rainfallChartData ? (
-          <div>
-            <div className="mb-3 sm:mb-4">
-              <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Live Weather Data for Your Location</h3>
-              <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                Updated hourly • Based on your coordinates
+      {hasSearchedWeather && (
+        <Card className="p-3 sm:p-4 md:p-6">
+          {rainfallChartData ? (
+            <div>
+              <div className="mb-3 sm:mb-4">
+                <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Live Weather Data for Your Location</h3>
+                <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                  Updated hourly • Based on your coordinates
+                </div>
               </div>
-            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
               {/* Temperature (2m) */}
               <div className="bg-orange-50 p-2 sm:p-3 md:p-4 rounded-lg">
@@ -567,12 +501,13 @@ const Dashboard: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 sm:py-12 text-gray-400">
-            <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-500 mb-3 sm:mb-4"></div>
-            <div className="text-base sm:text-lg font-medium">Loading weather data...</div>
-            <div className="text-xs sm:text-sm mt-1 sm:mt-2">Fetching Weather Data</div>
+            <CloudRainIcon className="h-12 w-12 sm:h-16 sm:w-16 mb-3 sm:mb-4 text-gray-300" />
+            <div className="text-base sm:text-lg font-medium text-gray-600">No weather data loaded</div>
+            <div className="text-xs sm:text-sm mt-1 sm:mt-2 text-center">Search for a city or use your location to view weather data</div>
           </div>
-        )}
-      </Card>
+          )}
+        </Card>
+      )}
     </div>
     {/* Enhanced Quick Actions Grid */}
     <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay4}`}>
