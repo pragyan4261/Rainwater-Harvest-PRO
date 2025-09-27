@@ -381,6 +381,10 @@
 }
 
 /* Progress Bar Width Classes */
+.progressWidth0 {
+  width: 0%;
+}
+
 .progressWidth33 {
   width: 33.333333%;
 }

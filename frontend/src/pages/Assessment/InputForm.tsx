@@ -249,7 +249,7 @@ const AssessmentInput: React.FC = () => {
             <div className="flex items-center space-x-2 px-4 py-2 bg-white bg-opacity-70 rounded-full backdrop-blur-sm border border-white border-opacity-20">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               <span className="text-sm font-semibold text-gray-700">
-                {Math.round((currentStep / 3) * 100)}% Complete
+                {Math.round(((currentStep - 1) / 3) * 100)}% Complete
               </span>
             </div>
           </div>
@@ -338,14 +338,15 @@ const AssessmentInput: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-gray-600">Overall Progress</span>
             <span className="text-sm font-bold text-indigo-600">
-              {Math.round((currentStep / 3) * 100)}%
+              {Math.round(((currentStep - 1) / 3) * 100)}%
             </span>
           </div>
           <div className="w-full bg-gradient-to-r from-gray-200 to-gray-300 h-3 rounded-full shadow-inner overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-1000 ease-out ${styles.progressBar} ${
-                currentStep === 1 ? styles.progressWidth33 : 
-                currentStep === 2 ? styles.progressWidth66 : 
+                currentStep === 1 ? styles.progressWidth0 : 
+                currentStep === 2 ? styles.progressWidth33 : 
+                currentStep === 3 ? styles.progressWidth66 :
                 styles.progressWidth100
               }`}
             />
