@@ -146,8 +146,8 @@ const AssessmentInput: React.FC = () => {
             errorMessage = "Location request timed out";
             break;
         }
-        setLocationError(errorMessage);
-        setLocationLoading(false);
+        //setLocationError(errorMessage);
+        //setLocationLoading(false);
       },
       {
         enableHighAccuracy: true,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import {
@@ -19,7 +19,9 @@ import Button from "../../components/ui/Button";
 import { weatherService, type WeatherData } from "../../services/weatherService";
 import styles from './Results.module.css';
 
+
 interface AssessmentData {
+  _id: string;
   feasibility: string;
   feasibilityDescription: string;
   roofArea: number;
@@ -79,6 +81,8 @@ interface AssessmentData {
   };
   currency?: string;
   modelVersion?: string;
+  createdAt: string; 
+  updatedAt: string; 
 }
 
 const AssessmentResults: React.FC = () => {
@@ -89,12 +93,69 @@ const AssessmentResults: React.FC = () => {
   const [error, setError] = useState("");
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
+  const reportRef = useRef(null); // Add a reference to the report container
+  const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+const handleDownloadPdf = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const API_URL = import.meta.env.VITE_API_BASE_URL;
+    const assessmentId = data?._id;
+
+    if (!token || !API_URL || !assessmentId) {
+      alert("Authentication failed or assessment data is missing.");
+      return;
+    }
+    
+    // Make the authenticated request to the backend
+    const response = await fetch(`${API_URL}/api/assessments/${assessmentId}/pdf`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      // The backend is working, so this is unlikely unless the token is now bad
+      throw new Error("Failed to generate PDF. The request was not authorized.");
+    }
+
+    // Get the response as a binary blob
+    const blob = await response.blob();
+    console.log("Blob type:", blob.type);
+    // Create a temporary URL for the blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create a temporary link element to trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assessment_report_${assessmentId}.pdf`; // This attribute is crucial
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up the temporary URL and link
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error("PDF Download Error:", err);
+    alert(`Could not download the PDF. Please try again. Error: ${err.message}`);
+  }
+};
+
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("/api/assessments/latest", {
+       
+
+        if (!token) {
+          throw new Error("Not authenticated. Please log in.");
+        }
+
+        const response = await fetch(`${API_URL}/api/assessments/latest`, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -105,8 +166,7 @@ const AssessmentResults: React.FC = () => {
         }
         const result = await response.json();
         setData(result);
-        
-        // Fetch weather data if coordinates are available
+
         if (result.latitude && result.longitude) {
           try {
             setWeatherLoading(true);
@@ -117,7 +177,6 @@ const AssessmentResults: React.FC = () => {
             setWeatherData(weather);
           } catch (weatherError) {
             console.error("Failed to fetch weather data:", weatherError);
-            // Continue without weather data - fallback to original rainfall chart
           } finally {
             setWeatherLoading(false);
           }
@@ -133,40 +192,24 @@ const AssessmentResults: React.FC = () => {
     fetchData();
   }, []);
 
+  // New function to handle PDF download
+  // New, robust function to handle PDF download for long content
+
+
   if (loading) {
     return (
       <MainLayout>
         <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-          {/* Main Loader Container */}
           <div className="relative">
-            {/* Animated Water Droplets */}
-            {/* <div className="flex space-x-2 mb-8">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="w-4 h-6 bg-gradient-to-b from-blue-400 to-blue-600 rounded-full animate-bounce"
-                  style={{
-                    animationDelay: `${i * 0.2}s`,
-                    animationDuration: '1s'
-                  } as React.CSSProperties}
-                ></div>
-              ))}
-            </div> */}
-            
-            {/* Circular Progress Ring */}
             <div className="relative w-24 h-24 mx-auto mb-6">
               <div className="absolute inset-0 rounded-full border-4 border-blue-100"></div>
               <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
-              
-              {/* Center Icon */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
                   <DropletIcon className="w-4 h-4 text-white animate-pulse" />
                 </div>
               </div>
             </div>
-            
-            {/* Loading Text with Animated Dots */}
             <div className="text-center">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
                 Loading Assessment Results
@@ -188,30 +231,6 @@ const AssessmentResults: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          {/* Background Animation Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Floating Bubbles */}
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute bg-blue-200 rounded-full opacity-20 animate-bounce"
-                style={{
-                  width: `${Math.random() * 20 + 10}px`,
-                  height: `${Math.random() * 20 + 10}px`,
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${Math.random() * 3 + 2}s`
-                } as React.CSSProperties}
-              ></div>
-            ))}
-            
-            {/* Subtle Grid Pattern */}
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          </div>
-          
-          {/* Progress Steps Indicator */}
           <div className="mt-12 flex items-center space-x-4">
             {[
               { label: 'Processing', icon: '🔄', active: true },
@@ -221,8 +240,8 @@ const AssessmentResults: React.FC = () => {
             ].map((step, index) => (
               <div key={index} className="flex flex-col items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-all duration-500 ${
-                  step.active 
-                    ? 'bg-blue-500 text-white animate-pulse' 
+                  step.active
+                    ? 'bg-blue-500 text-white animate-pulse'
                     : 'bg-gray-200 text-gray-400'
                 }`}>
                   {step.icon}
@@ -252,8 +271,8 @@ const AssessmentResults: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className={styles.resultsContainer}>
-        {/* Enhanced Hero Section */}
+      {/* Attach the reportRef to the main container */}
+      <div ref={reportRef} className={styles.resultsContainer}>
         <div className={styles.heroSection}>
           <div className={styles.heroContent}>
             <div className={`flex justify-between items-start mb-4 ${styles.heroHeaderActions}`}>
@@ -264,32 +283,28 @@ const AssessmentResults: React.FC = () => {
                 </p>
               </div>
               <div className={`flex space-x-3 ${styles.heroActionButtons}`}>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   icon={<ShareIcon size={18} />}
                 >
                   Share
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   icon={<DownloadIcon size={18} />}
+                  onClick={handleDownloadPdf} // Attach the new handler
                 >
                   {t('results.savePdf')}
                 </Button>
               </div>
             </div>
-            
-            {/* Feasibility Status */}
             <div className={styles.feasibilityBadge}>
               <CheckCircleIcon className={`w-5 h-5 ${styles.feasibilityIcon}`} />
               Feasibility: {data?.feasibility || "N/A"}
             </div>
-            
             <p className="opacity-90 mb-6">
               {data?.feasibilityDescription || "No description available"}
             </p>
-            
-            {/* Hero Stats */}
             <div className={styles.heroStats}>
               <div className={`${styles.heroStat} ${styles.metricBlue}`}>
                 <div className={styles.heroStatIcon}>
@@ -300,7 +315,6 @@ const AssessmentResults: React.FC = () => {
                 </div>
                 <div className={styles.heroStatLabel}>Roof Area</div>
               </div>
-              
               <div className={`${styles.heroStat} ${styles.metricGreen}`}>
                 <div className={styles.heroStatIcon}>
                   <CloudRainIcon className="w-6 h-6" />
@@ -310,7 +324,6 @@ const AssessmentResults: React.FC = () => {
                 </div>
                 <div className={styles.heroStatLabel}>Annual Rainfall</div>
               </div>
-              
               <div className={`${styles.heroStat} ${styles.metricCyan}`}>
                 <div className={styles.heroStatIcon}>
                   <DropletIcon className="w-6 h-6" />
@@ -320,7 +333,6 @@ const AssessmentResults: React.FC = () => {
                 </div>
                 <div className={styles.heroStatLabel}>Potential Harvest</div>
               </div>
-              
               <div className={`${styles.heroStat} ${styles.metricPurple}`}>
                 <div className={styles.heroStatIcon}>
                   <BeakerIcon className="w-6 h-6" />
@@ -333,11 +345,8 @@ const AssessmentResults: React.FC = () => {
             </div>
           </div>
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* ===== LEFT SECTION ===== */}
           <div className={`lg:col-span-2 ${styles.leftColumn}`}>
-            {/* Technical Metrics Section */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -348,7 +357,6 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Detailed technical specifications and efficiency analysis</p>
                 </div>
               </div>
-              
               <div className={styles.metricsGrid}>
                 <div className={`${styles.metricCard} ${styles.metricCyan}`}>
                   <div className={styles.metricIcon}>
@@ -359,7 +367,6 @@ const AssessmentResults: React.FC = () => {
                   </div>
                   <div className={styles.metricLabel}>System Efficiency</div>
                 </div>
-                
                 <div className={`${styles.metricCard} ${styles.metricOrange}`}>
                   <div className={styles.metricIcon}>
                     <ArrowBigRightDashIcon className="w-6 h-6" />
@@ -371,8 +378,6 @@ const AssessmentResults: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Recommended Structures Section */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -383,7 +388,6 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Optimal rainwater harvesting components for your property</p>
                 </div>
               </div>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {data?.recommendedStructures?.length ? (
                   data.recommendedStructures.map((s, idx) => (
@@ -405,8 +409,6 @@ const AssessmentResults: React.FC = () => {
                 )}
               </div>
             </div>
-
-            {/* Live Weather Data & Rainfall Distribution */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -419,16 +421,13 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Real-time weather conditions and precipitation analysis</p>
                 </div>
               </div>
-              
               {weatherLoading && (
                 <div className="bg-blue-50 rounded-lg p-4 mb-6 text-center">
                   <p className="text-blue-600">🌦️ Loading live weather data...</p>
                 </div>
               )}
-              
               {weatherData ? (
                 <div className={styles.weatherChart}>
-                  {/* Current Weather Conditions */}
                   <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 mb-6">
                     <h4 className="font-medium mb-4">Current Weather Conditions</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -458,8 +457,6 @@ const AssessmentResults: React.FC = () => {
                       </div>
                     </div>
                   </div>
-
-                  {/* Enhanced 7-Day Rainfall Chart */}
                   <div className={styles.chartContainer}>
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center space-x-3">
@@ -478,8 +475,6 @@ const AssessmentResults: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
-                    {/* Chart */}
                     <div className={styles.chartBars}>
                       {weatherData.daily.rain_sum && weatherService.getWeeklyRainfall(weatherData.daily.rain_sum).map((rainfall, i) => {
                         const weeklyData = weatherService.getWeeklyRainfall(weatherData.daily.rain_sum || new Float32Array());
@@ -489,10 +484,9 @@ const AssessmentResults: React.FC = () => {
                         date.setDate(date.getDate() - (6 - i));
                         const isToday = i === 6;
                         const isHighRain = rainfall > maxRain * 0.7;
-                        
                         return (
                           <div key={i} className={styles.chartBar}>
-                            <div 
+                            <div
                               className={`${styles.barElement} ${
                                 isToday ? styles.barToday :
                                 isHighRain ? styles.barHeavy :
@@ -506,7 +500,6 @@ const AssessmentResults: React.FC = () => {
                                 </div>
                               )}
                             </div>
-                            
                             <div className={styles.barLabel}>
                               <div className={`text-xs font-medium ${isToday ? 'text-orange-600' : 'text-gray-600'}`}>
                                 {date.toLocaleDateString('en-US', { weekday: 'short' })}
@@ -522,35 +515,24 @@ const AssessmentResults: React.FC = () => {
                         );
                       })}
                     </div>
-                    
-                    {/* Rain Status Indicator */}
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-3 h-3 rounded-full ${
-                            weatherData.current.rain > 0 ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'
-                          }`}></div>
-                          <span className="text-sm font-medium text-gray-700">
-                            {weatherData.current.rain > 0 ? '🌧️ Currently Raining' : '☀️ No Current Rain'}
-                          </span>
-                        </div>
-                        <div className="text-sm text-blue-600 font-semibold">
-                          {weatherData.current.rain.toFixed(1)} mm/h
-                        </div>
+                    <div className="text-center mt-4">
+                      <span className="text-sm font-medium text-gray-600">Months</span>
+                    </div>
+                    <div className="flex items-center justify-center mt-4 space-x-4 text-xs">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 bg-gradient-to-t from-blue-600 to-blue-400 rounded-sm"></div>
+                        <span className="text-gray-600">Monthly Precipitation</span>
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                // Enhanced Fallback Rainfall Distribution
                 <div className={styles.weatherChart}>
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="font-semibold text-gray-800">{t('results.monthlyPrecipitation')}</h4>
                     <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{t('results.mmPerMonth')}</span>
                   </div>
-                  
                   <div className="relative bg-gradient-to-t from-gray-50 to-transparent rounded-lg p-6">
-                    {/* Y-axis labels */}
                     <div className="absolute left-0 top-6 bottom-16 flex flex-col justify-between text-xs text-gray-400">
                       <span>200</span>
                       <span>150</span>
@@ -558,21 +540,16 @@ const AssessmentResults: React.FC = () => {
                       <span>50</span>
                       <span>0</span>
                     </div>
-                    
-                    {/* Grid lines */}
                     <div className="absolute left-8 right-4 top-6 bottom-16 flex flex-col justify-between">
                       {[0, 1, 2, 3, 4].map((i) => (
                         <div key={i} className="h-px bg-gray-200 opacity-40"></div>
                       ))}
                     </div>
-                    
-                    {/* Chart bars */}
                     <div className="relative h-48 ml-8 mr-4">
                       <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around h-40">
                         {data?.rainfallDistribution?.length ? (
                           data.rainfallDistribution.map((value, i) => (
                             <div key={i} className="flex flex-col items-center group cursor-pointer transition-all duration-300 hover:transform hover:scale-110">
-                              {/* Tooltip */}
                               <div className="absolute -top-12 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
                                 <div className="font-semibold">{value} mm</div>
                                 <div className="text-gray-300">
@@ -582,19 +559,16 @@ const AssessmentResults: React.FC = () => {
                                   <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                                 </div>
                               </div>
-                              
                               <div
                                 className="w-8 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg shadow-lg transition-all hover:shadow-xl hover:from-blue-700 hover:to-blue-500"
                                 style={{ height: `${(value / 200) * 100}%`, minHeight: value > 0 ? '4px' : '2px' } as React.CSSProperties}
                               >
-                                {/* Rain drop animation for bars with data */}
                                 {value > 0 && (
                                   <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1">
                                     <div className="w-1 h-1 bg-white rounded-full animate-pulse"></div>
                                   </div>
                                 )}
                               </div>
-                              
                               <div className="mt-2 text-center">
                                 <span className="text-xs font-medium text-gray-600">
                                   {["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"][i]}
@@ -613,13 +587,9 @@ const AssessmentResults: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    
-                    {/* X-axis label */}
                     <div className="text-center mt-4">
                       <span className="text-sm font-medium text-gray-600">Months</span>
                     </div>
-                    
-                    {/* Chart legend */}
                     <div className="flex items-center justify-center mt-4 space-x-4 text-xs">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-gradient-to-t from-blue-600 to-blue-400 rounded-sm"></div>
@@ -630,8 +600,6 @@ const AssessmentResults: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Groundwater Level Prediction */}
             <div className={styles.sectionCard}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -642,7 +610,6 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Estimated depth and recharge recommendations for your area</p>
                 </div>
               </div>
-              
               <div className={styles.groundwaterVisualization}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-white/80">Surface Level</span>
@@ -653,7 +620,6 @@ const AssessmentResults: React.FC = () => {
                   {data?.groundwaterLevel || 0}m
                 </div>
               </div>
-              
               <div className="space-y-3">
                 <p className="text-sm text-gray-600">
                   The <strong>groundwater level</strong> in your area is at <span className="font-semibold text-blue-600">{data?.groundwaterLevel || 0}m</span> depth.
@@ -677,8 +643,6 @@ const AssessmentResults: React.FC = () => {
                 )}
               </div>
             </div>
-
-            {/* Aquifer Information Section */}
             {data?.aquiferInfo && data.aquiferInfo.success && (
               <div className={styles.sectionCard}>
                 <div className={styles.sectionHeader}>
@@ -690,10 +654,8 @@ const AssessmentResults: React.FC = () => {
                     <p className={styles.sectionSubtitle}>Regional groundwater resources analysis</p>
                   </div>
                 </div>
-                
                 <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Aquifer Details */}
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold text-blue-900 text-lg mb-2">
@@ -741,15 +703,13 @@ const AssessmentResults: React.FC = () => {
                         </div>
                       </div>
                     </div>
-
-                    {/* Assessment & Statistics */}
                     <div className="space-y-4">
                       {data.aquiferInfo.feasibility_score !== undefined && (
                         <div>
                           <h4 className="font-semibold text-gray-800 mb-2">Aquifer Feasibility Assessment</h4>
                           <div className="relative">
                             <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-                              <div 
+                              <div
                                 className={`bg-gradient-to-r from-blue-500 to-cyan-500 h-3 rounded-full transition-all duration-1000 ${styles.aquiferFeasibilityBar}`}
                                 style={{"--feasibility-width": `${data.aquiferInfo.feasibility_score}%`} as React.CSSProperties}
                               ></div>
@@ -767,7 +727,6 @@ const AssessmentResults: React.FC = () => {
                           </p>
                         </div>
                       )}
-
                       {data.aquiferInfo.statistics && (
                         <div>
                           <h4 className="font-semibold text-gray-800 mb-2">Regional Statistics</h4>
@@ -789,8 +748,6 @@ const AssessmentResults: React.FC = () => {
                       )}
                     </div>
                   </div>
-
-                  {/* Recommendations */}
                   {data.aquiferInfo.recommendations && data.aquiferInfo.recommendations.length > 0 && (
                     <div className="mt-6 pt-4 border-t border-blue-200">
                       <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
@@ -807,8 +764,6 @@ const AssessmentResults: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  
-                  {/* Coordinates Display */}
                   {data.aquiferInfo.nearest_aquifer && (
                     <div className="mt-4 pt-4 border-t border-blue-200">
                       <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
@@ -829,10 +784,7 @@ const AssessmentResults: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* ===== RIGHT SECTION ===== */}
           <div className={styles.rightColumn}>
-            {/* Cost Estimation Section */}
             <div className={styles.costBreakdown}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -843,7 +795,6 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Detailed breakdown of implementation costs</p>
                 </div>
               </div>
-
               <div className="space-y-3 mb-6">
                 <div className={styles.costItem}>
                   <div>
@@ -854,7 +805,6 @@ const AssessmentResults: React.FC = () => {
                     ₹{data?.costEstimation?.storageTank?.toLocaleString('en-IN') || 0}
                   </div>
                 </div>
-                
                 <div className={styles.costItem}>
                   <div>
                     <div className={styles.costItemLabel}>Recharge Pit</div>
@@ -864,7 +814,6 @@ const AssessmentResults: React.FC = () => {
                     ₹{data?.costEstimation?.rechargePit?.toLocaleString('en-IN') || 0}
                   </div>
                 </div>
-                
                 <div className={styles.costItem}>
                   <div>
                     <div className={styles.costItemLabel}>Gutters & Pipes</div>
@@ -874,7 +823,6 @@ const AssessmentResults: React.FC = () => {
                     ₹{data?.costEstimation?.guttersPipes?.toLocaleString('en-IN') || 0}
                   </div>
                 </div>
-                
                 <div className={styles.costItem}>
                   <div>
                     <div className={styles.costItemLabel}>Filtration System</div>
@@ -884,7 +832,6 @@ const AssessmentResults: React.FC = () => {
                     ₹{data?.costEstimation?.filtrationSystem?.toLocaleString('en-IN') || 0}
                   </div>
                 </div>
-                
                 <div className={styles.costItem}>
                   <div>
                     <div className={styles.costItemLabel}>Installation</div>
@@ -895,7 +842,6 @@ const AssessmentResults: React.FC = () => {
                   </div>
                 </div>
               </div>
-
               <div className={styles.costTotal}>
                 <div className="text-lg font-semibold mb-1">Total Estimated Cost</div>
                 <div className="text-3xl font-bold">
@@ -907,8 +853,6 @@ const AssessmentResults: React.FC = () => {
                   </div>
                 )}
               </div>
-              
-              {/* Cost Analysis */}
               <div className="mt-4 p-4 bg-white/50 rounded-lg border border-amber-200">
                 <h5 className="font-semibold text-amber-800 mb-3 flex items-center">
                   <BarChart2Icon className="w-4 h-4 mr-2" />
@@ -929,20 +873,16 @@ const AssessmentResults: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
-              {/* Regional Note */}
               <div className="mt-4 text-xs text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-200">
                 <div className="flex items-start">
                   <span className="mr-2">💡</span>
                   <div>
-                    <strong>Regional Pricing Note:</strong> Costs are based on Tier-2 Indian cities. 
+                    <strong>Regional Pricing Note:</strong> Costs are based on Tier-2 Indian cities.
                     Metro cities may be 15-20% higher, smaller towns 10-15% lower.
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* ROI Section */}
             <div className={styles.roiCard}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -953,7 +893,6 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Financial returns and payback analysis</p>
                 </div>
               </div>
-
               <div className="text-center mb-6">
                 <p className="text-sm text-green-700 mb-2">Estimated Annual Savings</p>
                 <div className={styles.roiValue}>
@@ -968,7 +907,6 @@ const AssessmentResults: React.FC = () => {
                   </p>
                 )}
               </div>
-              
               <div className={styles.environmentalImpact}>
                 <div className="flex items-center mb-3">
                   <DropletIcon className="w-5 h-5 text-green-600 mr-2" />
@@ -991,8 +929,6 @@ const AssessmentResults: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            {/* Next Steps Section */}
             <div className={styles.nextStepsCard}>
               <div className={styles.sectionHeader}>
                 <div className={styles.sectionIcon}>
@@ -1003,7 +939,6 @@ const AssessmentResults: React.FC = () => {
                   <p className={styles.sectionSubtitle}>Your roadmap to implementation</p>
                 </div>
               </div>
-              
               <div className="space-y-4 mb-6">
                 <div className={styles.stepItem}>
                   <div className={styles.stepNumber}>1</div>
@@ -1024,7 +959,6 @@ const AssessmentResults: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
               <Button
                 variant="primary"
                 fullWidth
@@ -1041,3 +975,4 @@ const AssessmentResults: React.FC = () => {
 };
 
 export default AssessmentResults;
+

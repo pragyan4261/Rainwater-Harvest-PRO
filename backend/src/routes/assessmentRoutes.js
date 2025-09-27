@@ -1,6 +1,6 @@
 import express from "express";
 import auth from "../middlewares/authMiddleware.js";
-import { saveAssessment } from "../controllers/assessmentController.js";
+import { saveAssessment, generatePdf, generateAllPdf } from "../controllers/assessmentController.js";
 import Assessment from "../models/assessmentModel.js";
 import fetch from "node-fetch";
 
@@ -8,6 +8,12 @@ const router = express.Router();
 
 // Save new assessment
 router.post("/", auth, saveAssessment);
+
+// Generate PDF for a single assessment
+router.get('/:id/pdf', auth, generatePdf);
+
+// Generate PDF for all assessments
+router.get("/all/pdf", auth, generateAllPdf);
 
 // ✅ Get all assessments (for Reports.tsx)
 router.get("/", auth, async (req, res) => {
@@ -100,39 +106,38 @@ router.get("/latest", auth, async (req, res) => {
       });
     }
 
-    res.json({
-      ...assessment.toObject(),
-      potentialHarvest: mlData.potential_harvest || 0,
-      tankVolume: mlData.tank_volume || 0,
-      efficiency: mlData.efficiency || 0,
-      inertia: mlData.inertia || 0,
-      latitude: assessment.latitude ? parseFloat(assessment.latitude) : undefined,
-      longitude: assessment.longitude ? parseFloat(assessment.longitude) : undefined,
-      costEstimation: {
-        storageTank: mlData.cost_estimation?.storage_tank || 0,
-        rechargePit: mlData.cost_estimation?.recharge_pit || 0,
-        guttersPipes: mlData.cost_estimation?.gutters_pipes || 0,
-        filtrationSystem: mlData.cost_estimation?.filtration_system || 0,
-        installation: mlData.cost_estimation?.installation || 0,
-        total: mlData.cost_estimation?.total || 0,
-        currency: mlData.cost_estimation?.currency || 'INR'
-      },
-      roi: {
-        annualSavings: mlData.roi?.annual_savings || 0,
-        paybackPeriod: mlData.roi?.payback_period || "N/A",
-        waterSaved: mlData.roi?.water_saved || 0,
-        runoffReduction: mlData.roi?.runoff_reduction || "0%",
-        currency: mlData.roi?.currency || 'INR'
-      },
-      feasibility: mlData.feasibility || "Not Assessed",
-      feasibilityDescription: mlData.feasibility_description || "Assessment pending",
-      recommendedStructures: mlData.recommended_structures || [],
-      rainfallDistribution: mlData.rainfall_distribution || Array(12).fill(0),
-      groundwaterLevel: mlData.groundwater_level || 0,
-      aquiferInfo: mlData.aquifer_info || null,  // Add aquifer information
-      currency: 'INR',  // Overall currency indicator
-      modelVersion: 'ML_trained_indian_data'  // Indicate we're using ML model
-    });
+    assessment.potentialHarvest = mlData.potential_harvest || 0;
+    assessment.tankVolume = mlData.tank_volume || 0;
+    assessment.efficiency = mlData.efficiency || 0;
+    assessment.inertia = mlData.inertia || 0;
+    assessment.costEstimation = {
+      storageTank: mlData.cost_estimation?.storage_tank || 0,
+      rechargePit: mlData.cost_estimation?.recharge_pit || 0,
+      guttersPipes: mlData.cost_estimation?.gutters_pipes || 0,
+      filtrationSystem: mlData.cost_estimation?.filtration_system || 0,
+      installation: mlData.cost_estimation?.installation || 0,
+      total: mlData.cost_estimation?.total || 0,
+      currency: mlData.cost_estimation?.currency || 'INR'
+    };
+    assessment.roi = {
+      annualSavings: mlData.roi?.annual_savings || 0,
+      paybackPeriod: mlData.roi?.payback_period || "N/A",
+      waterSaved: mlData.roi?.water_saved || 0,
+      runoffReduction: mlData.roi?.runoff_reduction || "0%",
+      currency: mlData.roi?.currency || 'INR'
+    };
+    assessment.feasibility = mlData.feasibility || "Not Assessed";
+    assessment.feasibilityDescription = mlData.feasibility_description || "Assessment pending";
+    assessment.recommendedStructures = mlData.recommended_structures || [];
+    assessment.rainfallDistribution = mlData.rainfall_distribution || Array(12).fill(0);
+    assessment.groundwaterLevel = mlData.groundwater_level || 0;
+    assessment.aquiferInfo = mlData.aquifer_info || null;
+    assessment.currency = 'INR';
+    assessment.modelVersion = 'ML_trained_indian_data';
+
+    const savedAssessment = await assessment.save();
+
+    res.json(savedAssessment);
   } catch (err) {
     console.error("Error fetching assessment:", err.message);
     res.status(500).json({ message: "Server error" });
