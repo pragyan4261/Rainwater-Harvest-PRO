@@ -1,0 +1,53 @@
+/* Onboarding Page Animations */
+
+@keyframes float-slow {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg); 
+  }
+  33% { 
+    transform: translateY(-20px) rotate(5deg); 
+  }
+  66% { 
+    transform: translateY(10px) rotate(-5deg); 
+  }
+}
+
+.floatSlow {
+  animation: float-slow linear infinite;
+}
+
+.floatDelay1 {
+  animation-delay: 0.5s;
+}
+
+.floatDelay2 {
+  animation-delay: 1s;
+}
+
+.floatDelay3 {
+  animation-delay: 1.5s;
+}
+
+.floatDelay4 {
+  animation-delay: 2s;
+}
+
+.floatDelay5 {
+  animation-delay: 2.5s;
+}
+
+.floatDelay6 {
+  animation-delay: 3s;
+}
+
+.particleDelay1 {
+  animation-delay: 0s;
+}
+
+.particleDelay2 {
+  animation-delay: 0.5s;
+}
+
+.particleDelay3 {
+  animation-delay: 1s;
+}
