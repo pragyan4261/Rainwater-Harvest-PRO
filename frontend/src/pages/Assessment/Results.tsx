@@ -112,7 +112,7 @@ const AssessmentResults: React.FC = () => {
           {/* Main Loader Container */}
           <div className="relative">
             {/* Animated Water Droplets */}
-            <div className="flex space-x-2 mb-8">
+            {/* <div className="flex space-x-2 mb-8">
               {[0, 1, 2].map((i) => (
                 <div
                   key={i}
@@ -123,7 +123,7 @@ const AssessmentResults: React.FC = () => {
                   } as React.CSSProperties}
                 ></div>
               ))}
-            </div>
+            </div> */}
             
             {/* Circular Progress Ring */}
             <div className="relative w-24 h-24 mx-auto mb-6">
