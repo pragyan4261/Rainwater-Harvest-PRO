@@ -11,8 +11,8 @@ import {
   EyeIcon,
   ZapIcon,
 } from 'lucide-react';
-import MainLayout from '../layouts/MainLayout';
-import { useMap } from '../hooks/useMap';
+import MainLayout from '../../layouts/MainLayout';
+import { useMap } from '../../hooks/useMap';
 import { useTranslation } from "react-i18next";
 import L from 'leaflet';
 import styles from './MapExplorer.module.css';

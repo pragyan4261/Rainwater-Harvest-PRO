@@ -9,7 +9,7 @@ import Signup from './pages/Auth/Signup';
 import Dashboard from './pages/Dashboard/Dashboard';
 import AssessmentInput from './pages/Assessment/InputForm';
 import AssessmentResults from './pages/Assessment/Results';
-import MapExplorer from './pages/MapExplorer';
+import MapExplorer from './pages/MapExplorer/MapExplorer';
 import Reports from './pages/Reports';
 import KnowledgeHub from './pages/KnowledgeHub';
 import Settings from './pages/Settings';
