@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/signup', signup);
 router.post('/login', login);
 router.get('/me', auth, (req, res) => {
-  res.json({ fullName: req.user.fullName });
+  res.json({ firstName: req.user.firstName , lastName: req.user.lastName, email: req.user.email });
 });
 
 export default router;

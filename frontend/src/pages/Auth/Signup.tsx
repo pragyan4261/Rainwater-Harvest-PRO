@@ -9,7 +9,7 @@ import { apiFetch } from '../../lib/api';
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
-  const [form, setForm] = useState({ fullName: '', email: '', password: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +55,8 @@ const Signup: React.FC = () => {
               Create an Account
             </h2>
             <form onSubmit={handleSignup}>
-              <Input label="Full Name" name="fullName" placeholder="John Doe" icon={<UserIcon size={18} />} required value={form.fullName} onChange={handleChange} />
+              <Input label="Full Name" name="firstName" placeholder="John" icon={<UserIcon size={18} />} required value={form.firstName} onChange={handleChange} />
+              <Input label="Full Name" name="lastName" placeholder="Doe" icon={<UserIcon size={18} />} required value={form.lastName} onChange={handleChange} />
               <Input label="Email" name="email" type="email" placeholder="your@email.com" icon={<MailIcon size={18} />} required value={form.email} onChange={handleChange} />
               <Input label="Password" name="password" type="password" placeholder="••••••••" icon={<LockIcon size={18} />} required value={form.password} onChange={handleChange} />
               <div className="flex items-center mb-6">

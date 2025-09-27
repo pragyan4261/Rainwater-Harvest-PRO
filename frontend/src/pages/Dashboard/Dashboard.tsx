@@ -72,7 +72,7 @@ const Dashboard: React.FC = () => {
         if (!res.ok) throw new Error('Unauthorized');
 
         const data = await res.json();
-        setUserName(data.fullName || 'User');
+        setUserName(data.firstName || 'User');
       } catch (err) {
         console.error('Error fetching user:', err);
         setUserName('User');
@@ -149,8 +149,8 @@ const Dashboard: React.FC = () => {
         }
       },
       () => {
-        setWeatherLoading(false);
-        setWeatherError('Location access denied. Please enable location services or search by city.');
+        // setWeatherLoading(false);
+        // setWeatherError('Location access denied. Please enable location services or search by city.');
       },
       {
         enableHighAccuracy: true,

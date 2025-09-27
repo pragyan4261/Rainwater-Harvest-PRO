@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserIcon, BellIcon, GlobeIcon, MoonIcon, ShieldIcon, HelpCircleIcon, MailIcon, MessageSquareIcon, InfoIcon } from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
 import Card from '../components/ui/Card';
@@ -14,8 +14,26 @@ const lngs = [
 const Settings: React.FC = () => {
   const { t, i18n } = useTranslation();
   const [selectedLang, setSelectedLang] = useState<string>(i18n.language || "en");
+  
+  // State for profile data
+  const [profileData, setProfileData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    zipCode: ''
+  });
+  // State to hold a copy of the original data for 'Cancel' functionality
+  const [initialProfileData, setInitialProfileData] = useState({ ...profileData }); 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const handleSave = () => {
+  const handleSaveLanguage = () => {
     i18n.changeLanguage(selectedLang);
     localStorage.setItem("preferredLanguage", selectedLang);
   };
@@ -50,6 +68,96 @@ const Settings: React.FC = () => {
     name: "About",
     icon: <InfoIcon size={18} />
   }];
+  const API_URL = import.meta.env.VITE_API_BASE_URL;
+  // Fetches user data from the backend when the component mounts
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Not authenticated. Please log in.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/api/user/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to fetch profile data");
+        }
+
+        setProfileData(data || {});
+        setInitialProfileData(data || {}); // Store initial data
+      } catch (err: any) {
+        setError(err.message || "Unexpected error occurred");
+        console.error("Error fetching profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  // Handles input changes and updates the state
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setProfileData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Sends the updated profile data to the backend
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Not authenticated. Please log in.");
+      }
+
+      const response = await fetch(`${API_URL}/api/user/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to save changes");
+      }
+
+      alert("Profile saved successfully!");
+      setIsEditing(false); // Exit editing mode on successful save
+      setInitialProfileData(profileData); // Update initial data with saved data
+    } catch (err: any) {
+      setError(err.message || "Unexpected error while saving");
+      alert(`Error saving profile: ${err.message}`);
+      console.error("Error saving profile:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Reverts changes and exits editing mode
+  const handleCancelEdit = () => {
+    setProfileData(initialProfileData); // Revert to original data
+    setIsEditing(false); // Exit editing mode
+  };
 
   return (
     <MainLayout>
@@ -80,39 +188,117 @@ const Settings: React.FC = () => {
               <h2 className="text-xl font-semibold mb-6">
                 {t("settings.profileInformation")}
               </h2>
-              <div className="flex items-center mb-6">
-                <div className="mr-4">
-                  <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
-                    <UserIcon className="h-10 w-10 text-gray-400" />
+              {loading ? (
+                <div className="flex justify-center items-center py-10">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                  <span className="ml-4 text-gray-600">Loading profile...</span>
+                </div>
+              ) : error ? (
+                <div className="text-center text-red-500">Error: {error}</div>
+              ) : (
+                <>
+                  <div className="flex items-center mb-6">
+                    <div className="mr-4">
+                      <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                        <UserIcon className="h-10 w-10 text-gray-400" />
+                      </div>
+                    </div>
+                    <div>
+                      <Button variant="outline" size="sm" disabled={!isEditing}>
+                        {t("settings.changePhoto")}
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-1">
+                        JPG, GIF or PNG. Max size 1MB.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <Button variant="outline" size="sm">
-                    {t("settings.changePhoto")}
-                  </Button>
-                  <p className="text-xs text-gray-500 mt-1">
-                    JPG, GIF or PNG. Max size 1MB.
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input label={t("settings.firstName")} value="Swarup" />
-                <Input label={t("settings.lastName")} value="Chanda" />
-                <Input label={t("settings.email")} type="email" value="rainwise@gmail.com" />
-                <Input label={t("settings.phoneNumber")} type="tel" value="+91 XXX XXX 7277" />
-              </div>
-              <div className="mt-6">
-                <h3 className="font-medium mb-4">{t("settings.defaultAddress")}</h3>
-                <Input label={t("settings.streetAddress")} value="NIT Silchar" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Input label={t("settings.city")} value="Silchar" />
-                  <Input label={t("settings.state")} value="Assam" />
-                  <Input label={t("settings.zipCode")} value="788010" />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end">
-                <Button variant="primary">{t("settings.saveChanges")}</Button>
-              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label={t("settings.firstName")}
+                      name="firstName"
+                      value={profileData.firstName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                    <Input
+                      label={t("settings.lastName")}
+                      name="lastName"
+                      value={profileData.lastName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                    <Input
+                      label={t("settings.email")}
+                      type="email"
+                      name="email"
+                      value={profileData.email}
+                      onChange={handleInputChange}
+                      disabled={true} // Email is typically not editable
+                    />
+                    <Input
+                      label={t("settings.phoneNumber")}
+                      type="tel"
+                      name="phoneNumber"
+                      value={profileData.phoneNumber}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  <div className="mt-6">
+                    <h3 className="font-medium mb-4">{t("settings.defaultAddress")}</h3>
+                    <Input
+                      label={t("settings.streetAddress")}
+                      name="streetAddress"
+                      value={profileData.streetAddress}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Input
+                        label={t("settings.city")}
+                        name="city"
+                        value={profileData.city}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                      />
+                      <Input
+                        label={t("settings.state")}
+                        name="state"
+                        value={profileData.state}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                      />
+                      <Input
+                        label={t("settings.zipCode")}
+                        name="zipCode"
+                        value={profileData.zipCode}
+                        onChange={handleInputChange}
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-6 flex justify-end gap-2">
+                    {isEditing ? (
+                      <>
+                        <Button variant="outline" onClick={handleCancelEdit} className="mr-2">
+                          {t("settings.cancel")}
+                        </Button>
+                        <Button 
+                          variant="primary"
+                          onClick={handleSaveProfile}
+                          disabled={saving || loading}
+                        >
+                          {saving ? 'Saving...' : t("settings.saveChanges")}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button variant="primary" onClick={() => setIsEditing(true)}>
+                        {t("settings.editProfile")}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
             </Card>
           )}
 
@@ -338,7 +524,7 @@ const Settings: React.FC = () => {
               </div>
 
               <div className="mt-6 flex justify-end">
-                <Button onClick={handleSave} variant="primary">{t("settings.savePreferences")}</Button>
+                <Button onClick={handleSaveLanguage} variant="primary">{t("settings.savePreferences")}</Button>
               </div>
             </Card>
           )}
@@ -662,5 +848,3 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
-
-

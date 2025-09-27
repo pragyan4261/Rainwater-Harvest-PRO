@@ -7,6 +7,7 @@ import authRoutes from './routes/authRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import familyRoutes from "./routes/familyRoutes.js";
+import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -199,6 +200,9 @@ Return ONLY valid JSON.`;
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+app.use("/api/user", userRoutes);
 
 // Other API routes
 app.use('/api/auth', authRoutes);

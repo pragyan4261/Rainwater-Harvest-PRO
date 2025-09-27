@@ -132,6 +132,8 @@ i18n.use(initReactI18next).init({
                     changePhoto: "Change Photo",
                     defaultAddress: "Default Address",
                     saveChanges: "Save Changes",
+                    editProfile: "Edit Profile",
+                    cancel: "Cancel",
 
                     notificationPreferences: "Notification Preferences",
                     assessmentReports: "Assessment Reports",
@@ -515,7 +517,8 @@ i18n.use(initReactI18next).init({
                     changePhoto: "फ़ोटो बदलें",
                     defaultAddress: "डिफ़ॉल्ट पता",
                     saveChanges: "परिवर्तन सहेजें",
-
+                    editProfile: "प्रोफ़ाइल संपादित करें",
+                    cancel: "रद्द करें",
                     notificationPreferences: "सूचना वरीयताएँ",
                     assessmentReports: "मूल्यांकन रिपोर्ट",
                     assessmentReportsDesc: "जब आपके मूल्यांकन पूर्ण हों तो सूचनाएं प्राप्त करें",
