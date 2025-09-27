@@ -6,9 +6,9 @@ import ReactMarkdown from 'react-markdown';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import remarkGfm from 'remark-gfm';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import MainLayout from '../layouts/MainLayout';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import MainLayout from '../../layouts/MainLayout';
 import styles from './RoofAnalysis.module.css';
 import { 
   UploadIcon, 

@@ -14,7 +14,7 @@ import Reports from './pages/Reports';
 import KnowledgeHub from './pages/KnowledgeHub';
 import Settings from './pages/Settings';
 import About from './pages/About';
-import RoofAnalysis from './pages/RoofAnalysis';
+import RoofAnalysis from './pages/RoofAnalysis/RoofAnalysis';
 import Community from './pages/Community';
 export function App() {
   return (

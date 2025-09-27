@@ -1,10 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DropletIcon, CloudRainIcon, FileTextIcon, BookOpenIcon, MapIcon, BarChart2Icon } from 'lucide-react';
+import { 
+  DropletIcon, 
+  CloudRainIcon, 
+  FileTextIcon, 
+  BookOpenIcon, 
+  MapIcon, 
+  BarChart2Icon,
+  SparklesIcon,
+  TrendingUpIcon,
+  ZapIcon,
+  ThermometerIcon,
+  WindIcon,
+  EyeIcon,
+  RefreshCwIcon,
+  ArrowUpIcon,
+  ActivityIcon,
+  CalendarIcon
+} from 'lucide-react';
 import MainLayout from '../layouts/MainLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { useTranslation } from "react-i18next";
+import styles from './Dashboard.module.css';
 
 const Dashboard: React.FC = () => {
 
@@ -290,71 +308,166 @@ useEffect(() => {
     }
   ];
   return <MainLayout>
-    <div className="mb-4 sm:mb-6 px-2 sm:px-0">
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
-       {t("welcome")} {userName} !
-      </h1>
-      <p className="text-sm sm:text-base text-gray-600">
-        {t("subtitle")}
-      </p>
+    {/* Enhanced Header Section with Gradient Background */}
+    <div className={`relative mb-8 -mx-6 -mt-6 px-6 pt-8 pb-6 bg-gradient-to-r from-blue-50 via-cyan-50 to-indigo-50 border-b border-blue-100 ${styles.fadeInUp}`}>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="relative">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className={`flex items-center space-x-4 ${styles.slideInLeft}`}>
+            <div className={`w-16 h-16 bg-gradient-to-br from-blue-500 via-cyan-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-xl ${styles.floatAnimation}`}>
+              <DropletIcon className="h-6 w-6 text-blue-600" />
+      </div>
+            <div>
+              <h1 className={`text-3xl font-bold mb-2 ${styles.gradientText}`}>
+                {t("welcome")} {userName}! 
+              </h1>
+              <p className="text-blue-700 font-medium text-lg">
+                {t("subtitle")}
+              </p>
+            </div>
+          </div>
+          
+          <div className={`hidden lg:flex items-center space-x-6 ${styles.slideInRight}`}>
+            <div className="text-center">
+              <div className={`w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2 ${styles.pulseGlow}`}>
+                <ActivityIcon className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="text-xs text-gray-600 font-medium">Live Data</span>
+            </div>
+            <div className="w-8 h-px bg-gradient-to-r from-blue-300 to-transparent"></div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                <TrendingUpIcon className="h-5 w-5 text-green-600" />
+              </div>
+              <span className="text-xs text-gray-600 font-medium">Analytics</span>
+            </div>
+            <div className="w-8 h-px bg-gradient-to-r from-green-300 to-transparent"></div>
+            <div className="text-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+                <ZapIcon className="h-5 w-5 text-purple-600" />
+              </div>
+              <span className="text-xs text-gray-600 font-medium">Insights</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Status Indicators */}
+        <div className={`mt-6 flex flex-wrap gap-3 ${styles.fadeInUp} ${styles.staggerDelay1}`}>
+          <div className="flex items-center space-x-2 px-3 py-2 bg-white bg-opacity-70 rounded-full backdrop-blur-sm border border-white border-opacity-20">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-700">Weather Data Live</span>
+          </div>
+          <div className="flex items-center space-x-2 px-3 py-2 bg-white bg-opacity-70 rounded-full backdrop-blur-sm border border-white border-opacity-20">
+            <CalendarIcon className="h-3 w-3 text-blue-600" />
+            <span className="text-sm font-medium text-gray-700">Updated Today</span>
+          </div>
+          <div className="flex items-center space-x-2 px-3 py-2 bg-white bg-opacity-70 rounded-full backdrop-blur-sm border border-white border-opacity-20">
+            <EyeIcon className="h-3 w-3 text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">24/7 Monitoring</span>
+          </div>
+        </div>
+      </div>
     </div>
-    {/* Weather Data from API */}
-    <div className="mb-6 sm:mb-8 px-2 sm:px-0">
-      <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Current Weather Forecast</h2>
+    
+    {/* Enhanced Weather Data Section */}
+    <div className={`mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay2}`}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+            <CloudRainIcon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">Current Weather Forecast</h2>
+            <p className="text-blue-600 font-medium">Real-time meteorological data</p>
+          </div>
+        </div>
+        <div className={`hidden md:flex items-center space-x-2 px-4 py-2 bg-blue-100 rounded-xl ${styles.pulseGlow}`}>
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <span className="text-sm font-semibold text-blue-700">Live Updates</span>
+        </div>
+      </div>
       
-      {/* Search and Location Controls */}
-      <div className="mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      {/* Enhanced Search and Location Controls */}
+      <div className={`mb-6 ${styles.slideInRight} ${styles.staggerDelay3}`}>
+        <div className="flex flex-col sm:flex-row gap-4">
           <form onSubmit={fetchWeatherByCity} className="flex-1">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Enter city name..."
-                className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={weatherLoading}
-              />
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Enter city name for weather data..."
+                  className="w-full px-4 py-3 text-base border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+                  disabled={weatherLoading}
+                />
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <EyeIcon className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
               <button
                 type="submit"
                 disabled={weatherLoading || !city.trim()}
-                className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-3 text-base bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
               >
-                {weatherLoading ? 'Loading...' : 'Search'}
+                {weatherLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    <span>Searching...</span>
+                  </div>
+                ) : (
+                  'Search'
+                )}
               </button>
             </div>
           </form>
           <button
             onClick={fetchWeatherByLocation}
             disabled={weatherLoading}
-            className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+            className="px-6 py-3 text-base bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-semibold flex items-center justify-center space-x-2"
           >
-            📍 Use My Location
+            <span>📍</span>
+            <span>Use My Location</span>
           </button>
         </div>
         
-        {/* Loading and Error Display */}
+        {/* Enhanced Status Messages */}
         {weatherLoading && (
-          <div className="mt-3 sm:mt-4 p-3 bg-blue-50 text-blue-700 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-              <span className="text-sm">Fetching weather data...</span>
+          <div className={`mt-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-xl border border-blue-200 ${styles.shimmerEffect}`}>
+            <div className="flex items-center gap-3">
+              <div className="animate-spin w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+              <div>
+                <span className="font-semibold">Fetching weather data...</span>
+                <p className="text-sm text-blue-600 mt-1">Getting real-time meteorological information</p>
+              </div>
             </div>
           </div>
         )}
         
         {weatherError && (
-          <div className="mt-3 sm:mt-4 p-3 bg-red-50 text-red-700 rounded-lg">
-            <div className="text-sm">
-              <strong>Error:</strong> {weatherError}
+          <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-rose-50 text-red-700 rounded-xl border border-red-200">
+            <div className="flex items-start gap-3">
+              <div className="w-5 h-5 bg-red-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-red-600 text-xs">!</span>
+              </div>
+              <div>
+                <span className="font-semibold">Error:</span> {weatherError}
+                <p className="text-sm text-red-600 mt-1">Please try a different city or enable location services</p>
+              </div>
             </div>
           </div>
         )}
         
         {currentLocation && (
-          <div className="mt-3 sm:mt-4 p-3 bg-green-50 text-green-700 rounded-lg">
-            <div className="text-sm">
-              <strong>Current Location:</strong> {currentLocation.name}
+          <div className={`mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-xl border border-green-200 ${styles.fadeInUp}`}>
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-green-200 rounded-full flex items-center justify-center">
+                <span className="text-green-600 text-xs">✓</span>
+              </div>
+              <div>
+                <span className="font-semibold">Current Location:</span> 
+                <p className="text-sm text-green-600 mt-1">{currentLocation.name}</p>
+              </div>
             </div>
           </div>
         )}
@@ -464,28 +577,94 @@ useEffect(() => {
         )}
       </Card>
     </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 px-2 sm:px-0">
-      {quickActions.map((action, index) => <Card key={index} className="flex items-start p-4 sm:p-5 md:p-6 hover:shadow-md transition-all cursor-pointer" onClick={action.action}>
-        <div className={`p-3 sm:p-4 rounded-lg mr-3 sm:mr-4 ${action.color}`}>
-          {action.icon}
-        </div>
-        <div>
-          <h3 className="font-semibold text-base sm:text-lg mb-1">{action.title}</h3>
-          <p className="text-gray-600 text-sm sm:text-base">{action.description}</p>
-        </div>
-      </Card>)}
+    {/* Enhanced Quick Actions Grid */}
+    <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay4}`}>
+      {quickActions.map((action, index) => (
+        <Card 
+          key={index} 
+          className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`} 
+          onClick={action.action}
+        >
+          <div className="p-6 flex items-start space-x-5">
+            <div className={`p-4 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 ${action.color} ${styles.floatAnimation}`}>
+              <div className={`transition-transform duration-300 group-hover:scale-110 ${styles.weatherIcon}`}>
+                {action.icon}
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+                {action.title}
+              </h3>
+              <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                {action.description}
+              </p>
+              <div className="mt-4 flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
+                <span className="mr-2">Get Started</span>
+                <ArrowUpIcon className="h-4 w-4 transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+              </div>
+            </div>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+        </Card>
+      ))}
     </div>
-    <div className="mb-6 sm:mb-8 px-2 sm:px-0">
-      <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">{t("mapPreview")}</h2>
-      <Card className="overflow-hidden">
-        <div className="bg-gray-100 h-48 sm:h-64 relative">
-          <div className="absolute inset-0 bg-cover bg-center" style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80')"
-          }}></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-          <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4">
-            <Button variant="primary" onClick={() => navigate('/map')} icon={<MapIcon size={16} />}>
-              <span className="text-sm sm:text-base">{t("exploreGIS")}</span>
+    {/* Enhanced Map Preview Section */}
+    <div className={`mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay1}`}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+            <MapIcon className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">{t("mapPreview")}</h2>
+            <p className="text-green-600 font-medium">Interactive geographic insights</p>
+          </div>
+        </div>
+        <div className={`px-4 py-2 bg-green-100 text-green-700 rounded-xl font-semibold text-sm ${styles.pulseGlow}`}>
+          GIS Ready
+        </div>
+      </div>
+      
+      <Card className={`overflow-hidden border-0 shadow-2xl ${styles.modernCard}`}>
+        <div className="relative h-80 bg-gradient-to-br from-green-100 to-blue-100 overflow-hidden">
+          <div className={`absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105 ${styles.mapBackground}`}></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-blue-500/20"></div>
+          
+          {/* Floating Elements */}
+          <div className={`absolute top-6 left-6 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-3 shadow-lg ${styles.floatAnimation}`}>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-gray-700">Live Mapping</span>
+            </div>
+          </div>
+          
+          <div className={`absolute top-6 right-6 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-3 shadow-lg ${styles.floatAnimation}`} style={{ animationDelay: '0.5s' }}>
+            <div className="flex items-center space-x-2">
+              <EyeIcon className="h-4 w-4 text-blue-600" />
+              <span className="text-sm font-semibold text-gray-700">Satellite View</span>
+            </div>
+          </div>
+          
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="mb-4 flex flex-wrap gap-2">
+              <div className="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full border border-white border-opacity-30">
+                <span className="text-white text-sm font-medium">🌧️ Rainfall Zones</span>
+              </div>
+              <div className="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full border border-white border-opacity-30">
+                <span className="text-white text-sm font-medium">🏠 Roof Analysis</span>
+              </div>
+              <div className="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full border border-white border-opacity-30">
+                <span className="text-white text-sm font-medium">💧 Water Sources</span>
+              </div>
+            </div>
+            
+            <Button 
+              variant="primary" 
+              onClick={() => navigate('/map')} 
+              icon={<MapIcon size={18} />}
+            >
+              <span className="text-base font-semibold">{t("exploreGIS")}</span>
             </Button>
           </div>
         </div>
@@ -752,61 +931,141 @@ useEffect(() => {
       </div>
     </div>
     
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 px-2 sm:px-0">
+    {/* Enhanced Statistics Section */}
+    <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay2}`}>
+      {/* Potential Savings Card */}
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">{t("potentialSavings")}</h2>
-        <Card className="h-56 sm:h-64 p-4 sm:p-5 md:p-6">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="font-medium text-base sm:text-lg">{t("estimatedSavings")}</h3>
-            <BarChart2Icon className="text-green-600 w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center p-3 sm:p-4 bg-green-50 rounded-full mb-3">
-              <DropletIcon className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+              <BarChart2Icon className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-800">14,500</h3>
-            <p className="text-gray-600 text-sm sm:text-base">{t("litersPerYear")}</p>
-            <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600">
-              {t("completeAssessment")}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">{t("potentialSavings")}</h2>
+              <p className="text-green-600 font-medium">Annual water conservation estimate</p>
+            </div>
+          </div>
+        </div>
+        
+        <Card className={`overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-green-50 to-emerald-50 ${styles.modernCard}`}>
+          <div className="p-8">
+            <div className="text-center">
+              <div className={`inline-flex items-center justify-center p-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-3xl mb-6 shadow-2xl ${styles.floatAnimation}`}>
+               
+              </div>
+              <div className="mb-4">
+                <h3 className={`text-5xl font-bold mb-2 ${styles.gradientText}`}>14,500</h3>
+                <p className="text-green-700 text-lg font-semibold">{t("litersPerYear")}</p>
+              </div>
+              <div className="bg-white bg-opacity-70 rounded-2xl p-4 backdrop-blur-sm border border-white border-opacity-50">
+                <p className="text-green-800 font-medium text-sm leading-relaxed">
+                  {t("completeAssessment")}
+                </p>
+              </div>
+              
+              {/* Additional Metrics */}
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                <div className={`bg-white bg-opacity-60 rounded-xl p-3 ${styles.statisticCard}`}>
+                  <div className="text-2xl font-bold text-green-700">₹12,500</div>
+                  <div className="text-xs text-green-600 font-medium">Annual Savings</div>
+                </div>
+                <div className={`bg-white bg-opacity-60 rounded-xl p-3 ${styles.statisticCard}`}>
+                  <div className="text-2xl font-bold text-blue-700">85%</div>
+                  <div className="text-xs text-blue-600 font-medium">Efficiency Rate</div>
+                </div>
+              </div>
             </div>
           </div>
         </Card>
       </div>
+      
+      {/* Weather Statistics Card */}
       <div>
-        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Weather Statistics</h2>
-        <Card className="h-90 sm:h-90 p-4 sm:p-5 md:p-6">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="font-medium text-base sm:text-lg">Weekly Summary</h3>
-            <CloudRainIcon className="text-blue-600 w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
+              <CloudRainIcon className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Weather Statistics</h2>
+              <p className="text-blue-600 font-medium">24-hour forecast summary</p>
+            </div>
           </div>
-          {rainfallChartData && (
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex justify-between items-center p-2 sm:p-3 bg-blue-50 rounded-lg">
-                <span className="text-xs sm:text-sm font-medium text-blue-800">Average Temperature</span>
-                <span className="text-base sm:text-lg font-bold text-blue-900">
-                  {(rainfallChartData.temperature_2m.reduce((a, b) => a + b, 0) / rainfallChartData.temperature_2m.length).toFixed(1)}°C
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-2 sm:p-3 bg-cyan-50 rounded-lg">
-                <span className="text-xs sm:text-sm font-medium text-cyan-800">Total Precipitation Expected</span>
-                <span className="text-base sm:text-lg font-bold text-cyan-900">
-                  {rainfallChartData.precipitation.reduce((a, b) => a + b, 0).toFixed(1)}mm
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-2 sm:p-3 bg-green-50 rounded-lg">
-                <span className="text-xs sm:text-sm font-medium text-green-800">Avg. Humidity</span>
-                <span className="text-base sm:text-lg font-bold text-green-900">
-                  {(rainfallChartData.relative_humidity_2m.reduce((a, b) => a + b, 0) / rainfallChartData.relative_humidity_2m.length).toFixed(0)}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center p-2 sm:p-3 bg-indigo-50 rounded-lg">
-                <span className="text-xs sm:text-sm font-medium text-indigo-800">Avg. Wind Speed</span>
-                <span className="text-base sm:text-lg font-bold text-indigo-900">
-                  {(rainfallChartData.wind_speed_10m.reduce((a, b) => a + b, 0) / rainfallChartData.wind_speed_10m.length).toFixed(1)} m/s
-                </span>
+        </div>
+        
+        <Card className={`overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-50 to-cyan-50 ${styles.modernCard}`}>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-xl text-gray-800">Weekly Summary</h3>
+              <div className={`flex items-center space-x-2 px-3 py-1 bg-blue-100 rounded-xl ${styles.pulseGlow}`}>
+                <ActivityIcon className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-semibold text-blue-700">Live Data</span>
               </div>
             </div>
-          )}
+            
+            {rainfallChartData && (
+              <div className="space-y-4">
+                <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl border border-orange-200 ${styles.statisticCard}`}>
+                  <div className="flex items-center space-x-3">
+                    <ThermometerIcon className="h-5 w-5 text-orange-600" />
+                    <span className="font-semibold text-orange-800">Average Temperature</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-orange-700">
+                      {(rainfallChartData.temperature_2m.reduce((a, b) => a + b, 0) / rainfallChartData.temperature_2m.length).toFixed(1)}°C
+                    </div>
+                    <div className="text-xs text-orange-600">24-hour avg</div>
+                  </div>
+                </div>
+                
+                <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border border-cyan-200 ${styles.statisticCard}`}>
+                  <div className="flex items-center space-x-3">
+                    <CloudRainIcon className="h-5 w-5 text-cyan-600" />
+                    <span className="font-semibold text-cyan-800">Total Precipitation</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-cyan-700">
+                      {rainfallChartData.precipitation.reduce((a, b) => a + b, 0).toFixed(1)}mm
+                    </div>
+                    <div className="text-xs text-cyan-600">Expected total</div>
+                  </div>
+                </div>
+                
+                <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200 ${styles.statisticCard}`}>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-lg">💨</span>
+                    <span className="font-semibold text-green-800">Average Humidity</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-700">
+                      {(rainfallChartData.relative_humidity_2m.reduce((a, b) => a + b, 0) / rainfallChartData.relative_humidity_2m.length).toFixed(0)}%
+                    </div>
+                    <div className="text-xs text-green-600">Relative humidity</div>
+                  </div>
+                </div>
+                
+                <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200 ${styles.statisticCard}`}>
+                  <div className="flex items-center space-x-3">
+                    <WindIcon className="h-5 w-5 text-indigo-600" />
+                    <span className="font-semibold text-indigo-800">Average Wind Speed</span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-indigo-700">
+                      {(rainfallChartData.wind_speed_10m.reduce((a, b) => a + b, 0) / rainfallChartData.wind_speed_10m.length).toFixed(1)} m/s
+                    </div>
+                    <div className="text-xs text-indigo-600">Wind velocity</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {!rainfallChartData && (
+              <div className={`flex flex-col items-center justify-center py-8 text-gray-400 ${styles.fadeInUp}`}>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                <div className="text-lg font-medium">Loading statistics...</div>
+              </div>
+            )}
+          </div>
         </Card>
       </div>
     </div>
