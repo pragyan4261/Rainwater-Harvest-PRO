@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DropletIcon, LeafIcon, ChevronRightIcon, HomeIcon, TrendingUpIcon, ShieldCheckIcon } from 'lucide-react';
-import Button from '../components/ui/Button';
-import MainLayout from '../layouts/MainLayout';
+import Button from '../../components/ui/Button';
+import MainLayout from '../../layouts/MainLayout';
 import styles from './Onboarding.module.css';
 
 interface OnboardingSlide {

@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 // Pages
-import SplashScreen from './pages/SplashScreen';
-import Onboarding from './pages/Onboarding';
+import SplashScreen from './pages/SplashScreen/SplashScreen';
+import Onboarding from './pages/Onboarding/Onboarding';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import Dashboard from './pages/Dashboard';
