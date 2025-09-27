@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  DropletIcon, 
-  CloudRainIcon, 
-  FileTextIcon, 
-  BookOpenIcon, 
-  MapIcon, 
+import {
+  DropletIcon,
+  CloudRainIcon,
+  FileTextIcon,
+  BookOpenIcon,
+  MapIcon,
   BarChart2Icon,
   SparklesIcon,
   TrendingUpIcon,
@@ -32,15 +32,15 @@ const Dashboard: React.FC = () => {
   const [city, setCity] = useState('');
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
 
   // Rainfall chart data state
-  const [rainfallChartData, setRainfallChartData] = useState<{ 
-    time: Date[]; 
+  const [rainfallChartData, setRainfallChartData] = useState<{
+    time: Date[];
     temperature_2m: number[];
-    precipitation: number[]; 
+    precipitation: number[];
     precipitation_probability: number[];
-    rain: number[]; 
+    rain: number[];
     showers: number[];
     weather_code: number[];
     relative_humidity_2m: number[];
@@ -53,15 +53,15 @@ const Dashboard: React.FC = () => {
     soil_moisture_0_to_1cm: number[];
   } | null>(null);
 
-    // Fetch user info from backend
-useEffect(() => {
+  // Fetch user info from backend
+  useEffect(() => {
     const fetchUser = async () => {
       const token = localStorage.getItem('token'); // ⬅️ get token from localStorage
       if (!token) return; // user not logged in
 
       try {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
-  const normalizedBase = baseUrl.replace(/\/$/, '');
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+        const normalizedBase = baseUrl.replace(/\/$/, '');
         const res = await fetch(`${normalizedBase}/api/auth/me`, {
           headers: {
             'Content-Type': 'application/json',
@@ -85,32 +85,32 @@ useEffect(() => {
   const fetchWeatherByCity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!city.trim()) return;
-    
+
     setWeatherLoading(true);
     setWeatherError(null);
-    
+
     try {
       // Get coordinates from city name using Nominatim
       const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
       const geoData = await geoRes.json();
-      
+
       if (!geoData.length) {
         throw new Error('City not found');
       }
-      
+
       const lat = parseFloat(geoData[0].lat);
       const lng = parseFloat(geoData[0].lon);
-      
+
       // Update current location
       setCurrentLocation({
         lat,
         lng,
         name: geoData[0].display_name || city
       });
-      
+
       // Fetch weather data for this location
       await fetchRainfallData(lat, lng);
-      
+
     } catch (error) {
       setWeatherError((error as Error).message || 'Error fetching weather data');
     } finally {
@@ -122,23 +122,23 @@ useEffect(() => {
   const fetchWeatherByLocation = () => {
     setWeatherLoading(true);
     setWeatherError(null);
-    
+
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
           const lat = coords.latitude;
           const lng = coords.longitude;
-          
+
           // Update current location
           setCurrentLocation({
             lat,
             lng,
             name: `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`
           });
-          
+
           // Fetch weather data for this location
           await fetchRainfallData(lat, lng);
-          
+
         } catch (error) {
           setWeatherError((error as Error).message || 'Error fetching weather data');
         } finally {
@@ -164,14 +164,14 @@ useEffect(() => {
       const response = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,precipitation,precipitation_probability,rain,showers,weather_code,relative_humidity_2m,evapotranspiration,cloud_cover_low,cloud_cover_mid,cloud_cover_high,wind_speed_10m,soil_temperature_0cm,soil_moisture_0_to_1cm`
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log('API Response:', data);
-      
+
       if (data.hourly && data.hourly.time) {
         const time = data.hourly.time.map((t: string) => new Date(t));
         const chartData = {
@@ -191,7 +191,7 @@ useEffect(() => {
           soil_temperature_0cm: data.hourly.soil_temperature_0cm || [],
           soil_moisture_0_to_1cm: data.hourly.soil_moisture_0_to_1cm || []
         };
-        
+
         console.log('Chart data processed:', chartData);
         setRainfallChartData(chartData);
       } else {
@@ -286,23 +286,23 @@ useEffect(() => {
       color: 'bg-blue-50'
     },
     {
-      title:t("quickActions.myReports"),
+      title: t("quickActions.myReports"),
       icon: <FileTextIcon className="h-8 w-8 text-green-600" />,
-      description:t("quickActions.myReportsDesc"),
+      description: t("quickActions.myReportsDesc"),
       action: () => navigate('/reports'),
       color: 'bg-green-50'
     },
     {
       title: t("quickActions.localRainfall"),
       icon: <CloudRainIcon className="h-8 w-8 text-cyan-600" />,
-      description:t("quickActions.localRainfallDesc"),
-      action: () =>navigate('/roof-analysis'),
+      description: t("quickActions.localRainfallDesc"),
+      action: () => navigate('/roof-analysis'),
       color: 'bg-cyan-50'
     },
     {
       title: t("quickActions.knowledgeHub"),
       icon: <BookOpenIcon className="h-8 w-8 text-purple-600" />,
-      description:t("quickActions.knowledgeHubDesc"),
+      description: t("quickActions.knowledgeHubDesc"),
       action: () => navigate('/knowledge'),
       color: 'bg-purple-50'
     }
@@ -314,19 +314,16 @@ useEffect(() => {
       <div className="relative">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className={`flex items-center space-x-4 ${styles.slideInLeft}`}>
-            <div className={`w-16 h-16 bg-gradient-to-br from-blue-500 via-cyan-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-xl ${styles.floatAnimation}`}>
-              <DropletIcon className="h-6 w-6 text-blue-600" />
-      </div>
             <div>
               <h1 className={`text-3xl font-bold mb-2 ${styles.gradientText}`}>
-                {t("welcome")} {userName}! 
+                {t("welcome")} {userName}!
               </h1>
               <p className="text-blue-700 font-medium text-lg">
                 {t("subtitle")}
               </p>
             </div>
           </div>
-          
+
           <div className={`hidden lg:flex items-center space-x-6 ${styles.slideInRight}`}>
             <div className="text-center">
               <div className={`w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2 ${styles.pulseGlow}`}>
@@ -350,7 +347,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        
+
         {/* Status Indicators */}
         <div className={`mt-6 flex flex-wrap gap-3 ${styles.fadeInUp} ${styles.staggerDelay1}`}>
           <div className="flex items-center space-x-2 px-3 py-2 bg-white bg-opacity-70 rounded-full backdrop-blur-sm border border-white border-opacity-20">
@@ -368,7 +365,7 @@ useEffect(() => {
         </div>
       </div>
     </div>
-    
+
     {/* Enhanced Weather Data Section */}
     <div className={`mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay2}`}>
       <div className="flex items-center justify-between mb-6">
@@ -386,7 +383,7 @@ useEffect(() => {
           <span className="text-sm font-semibold text-blue-700">Live Updates</span>
         </div>
       </div>
-      
+
       {/* Enhanced Search and Location Controls */}
       <div className={`mb-6 ${styles.slideInRight} ${styles.staggerDelay3}`}>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -430,7 +427,7 @@ useEffect(() => {
             <span>Use My Location</span>
           </button>
         </div>
-        
+
         {/* Enhanced Status Messages */}
         {weatherLoading && (
           <div className={`mt-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-xl border border-blue-200 ${styles.shimmerEffect}`}>
@@ -443,7 +440,7 @@ useEffect(() => {
             </div>
           </div>
         )}
-        
+
         {weatherError && (
           <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-rose-50 text-red-700 rounded-xl border border-red-200">
             <div className="flex items-start gap-3">
@@ -457,7 +454,7 @@ useEffect(() => {
             </div>
           </div>
         )}
-        
+
         {currentLocation && (
           <div className={`mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-xl border border-green-200 ${styles.fadeInUp}`}>
             <div className="flex items-center gap-3">
@@ -465,21 +462,21 @@ useEffect(() => {
                 <span className="text-green-600 text-xs">✓</span>
               </div>
               <div>
-                <span className="font-semibold">Current Location:</span> 
+                <span className="font-semibold">Current Location:</span>
                 <p className="text-sm text-green-600 mt-1">{currentLocation.name}</p>
               </div>
             </div>
           </div>
         )}
       </div>
-      
+
       <Card className="p-3 sm:p-4 md:p-6">
         {rainfallChartData ? (
           <div>
             <div className="mb-3 sm:mb-4">
               <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2">Live Weather Data for Your Location</h3>
               <div className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
-                 Updated hourly • Based on your coordinates
+                Updated hourly • Based on your coordinates
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
@@ -488,79 +485,79 @@ useEffect(() => {
                 <div className="text-xs sm:text-sm text-orange-600 font-medium">Temperature (2m)</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-orange-700">{rainfallChartData.temperature_2m[0]?.toFixed(1) || 0}°C</div>
               </div>
-              
+
               {/* Precipitation */}
               <div className="bg-blue-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-blue-600 font-medium">Precipitation</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-700">{rainfallChartData.precipitation[0]?.toFixed(1) || 0} mm</div>
               </div>
-              
+
               {/* Precipitation Probability */}
               <div className="bg-yellow-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-yellow-600 font-medium">Precipitation Probability</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-700">{rainfallChartData.precipitation_probability[0]?.toFixed(0) || 0}%</div>
               </div>
-              
+
               {/* Rain */}
               <div className="bg-cyan-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-cyan-600 font-medium">Rain</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-cyan-700">{rainfallChartData.rain[0]?.toFixed(1) || 0} mm</div>
               </div>
-              
+
               {/* Showers */}
               <div className="bg-purple-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-purple-600 font-medium">Showers</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-700">{rainfallChartData.showers[0]?.toFixed(1) || 0} mm</div>
               </div>
-              
+
               {/* Weather Code */}
               <div className="bg-gray-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-gray-600 font-medium">Weather Code</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-700">{rainfallChartData.weather_code[0] || 0}</div>
               </div>
-              
+
               {/* Relative Humidity */}
               <div className="bg-green-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-green-600 font-medium">Relative Humidity</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-700">{rainfallChartData.relative_humidity_2m[0]?.toFixed(0) || 0}%</div>
               </div>
-              
+
               {/* Evapotranspiration */}
               <div className="bg-teal-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-teal-600 font-medium">Evapotranspiration</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-teal-700">{rainfallChartData.evapotranspiration[0]?.toFixed(2) || 0} mm</div>
               </div>
-              
+
               {/* Cloud Cover Low */}
               <div className="bg-slate-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-slate-600 font-medium">Cloud Cover Low</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-700">{rainfallChartData.cloud_cover_low[0]?.toFixed(0) || 0}%</div>
               </div>
-              
+
               {/* Cloud Cover Mid */}
               <div className="bg-zinc-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-zinc-600 font-medium">Cloud Cover Mid</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-zinc-700">{rainfallChartData.cloud_cover_mid[0]?.toFixed(0) || 0}%</div>
               </div>
-              
+
               {/* Cloud Cover High */}
               <div className="bg-stone-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-stone-600 font-medium">Cloud Cover High</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-stone-700">{rainfallChartData.cloud_cover_high[0]?.toFixed(0) || 0}%</div>
               </div>
-              
+
               {/* Wind Speed 10m */}
               <div className="bg-indigo-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-indigo-600 font-medium">Wind Speed (10m)</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-indigo-700">{rainfallChartData.wind_speed_10m[0]?.toFixed(1) || 0} m/s</div>
               </div>
-              
+
               {/* Soil Temperature */}
               <div className="bg-amber-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-amber-600 font-medium">Soil Temperature (0cm)</div>
                 <div className="text-lg sm:text-xl md:text-2xl font-bold text-amber-700">{rainfallChartData.soil_temperature_0cm[0]?.toFixed(1) || 0}°C</div>
               </div>
-              
+
               {/* Soil Moisture */}
               <div className="bg-emerald-50 p-2 sm:p-3 md:p-4 rounded-lg">
                 <div className="text-xs sm:text-sm text-emerald-600 font-medium">Soil Moisture (0-1cm)</div>
@@ -580,9 +577,9 @@ useEffect(() => {
     {/* Enhanced Quick Actions Grid */}
     <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay4}`}>
       {quickActions.map((action, index) => (
-        <Card 
-          key={index} 
-          className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`} 
+        <Card
+          key={index}
+          className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`}
           onClick={action.action}
         >
           <div className="p-6 flex items-start space-x-5">
@@ -624,13 +621,13 @@ useEffect(() => {
           GIS Ready
         </div>
       </div>
-      
+
       <Card className={`overflow-hidden border-0 shadow-2xl ${styles.modernCard}`}>
         <div className="relative h-80 bg-gradient-to-br from-green-100 to-blue-100 overflow-hidden">
           <div className={`absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105 ${styles.mapBackground}`}></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-blue-500/20"></div>
-          
+
           {/* Floating Elements */}
           <div className={`absolute top-6 left-6 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-3 shadow-lg ${styles.floatAnimation}`}>
             <div className="flex items-center space-x-2">
@@ -638,14 +635,14 @@ useEffect(() => {
               <span className="text-sm font-semibold text-gray-700">Live Mapping</span>
             </div>
           </div>
-          
+
           <div className={`absolute top-6 right-6 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-3 shadow-lg ${styles.floatAnimation}`} style={{ animationDelay: '0.5s' }}>
             <div className="flex items-center space-x-2">
               <EyeIcon className="h-4 w-4 text-blue-600" />
               <span className="text-sm font-semibold text-gray-700">Satellite View</span>
             </div>
           </div>
-          
+
           <div className="absolute bottom-6 left-6 right-6">
             <div className="mb-4 flex flex-wrap gap-2">
               <div className="px-3 py-1 bg-white bg-opacity-20 backdrop-blur-sm rounded-full border border-white border-opacity-30">
@@ -658,10 +655,10 @@ useEffect(() => {
                 <span className="text-white text-sm font-medium">💧 Water Sources</span>
               </div>
             </div>
-            
-            <Button 
-              variant="primary" 
-              onClick={() => navigate('/map')} 
+
+            <Button
+              variant="primary"
+              onClick={() => navigate('/map')}
               icon={<MapIcon size={18} />}
             >
               <span className="text-base font-semibold">{t("exploreGIS")}</span>
@@ -680,8 +677,8 @@ useEffect(() => {
               <p className="text-xs sm:text-sm text-gray-600">24-Hour Weather Forecast with Interactive Chart</p>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
-              <button 
-                onClick={() => window.location.reload()} 
+              <button
+                onClick={() => window.location.reload()}
                 className="text-xs bg-blue-100 text-blue-600 px-2 sm:px-3 py-1 sm:py-2 rounded-lg hover:bg-blue-200 transition-colors font-medium w-full sm:w-auto"
               >
                 🔄 Refresh Data
@@ -689,7 +686,7 @@ useEffect(() => {
               <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 sm:py-2 rounded-lg w-full sm:w-auto text-center sm:text-left">{t("today")}</span>
             </div>
           </div>
-          
+
           {rainfallChartData && (
             <div className="mb-3 sm:mb-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 p-3 sm:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
               <div className="text-center">
@@ -726,20 +723,20 @@ useEffect(() => {
                     <span>5mm</span>
                     <span>0mm</span>
                   </div>
-                  
+
                   {/* Chart area */}
                   <div className="ml-6 sm:ml-10 mr-1 sm:mr-2 h-full relative">
                     {/* Grid lines */}
                     <div className="absolute inset-0 bottom-8 sm:bottom-12">
                       {[0, 25, 50, 75, 100].map((percent) => (
-                        <div 
+                        <div
                           key={percent}
                           className="absolute w-full border-t border-gray-200 opacity-50"
                           style={{ bottom: `${percent}%` }}
                         />
                       ))}
                     </div>
-                    
+
                     {/* Weather bars */}
                     <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 flex items-end justify-between h-full">
                       {rainfallChartData.time.slice(0, 24).map((timePoint, i) => {
@@ -752,17 +749,17 @@ useEffect(() => {
                         const wind_speed = rainfallChartData.wind_speed_10m[i] || 0;
                         const weather_code = rainfallChartData.weather_code[i] || 0;
                         const cloud_cover_total = (
-                          (rainfallChartData.cloud_cover_low[i] || 0) + 
-                          (rainfallChartData.cloud_cover_mid[i] || 0) + 
+                          (rainfallChartData.cloud_cover_low[i] || 0) +
+                          (rainfallChartData.cloud_cover_mid[i] || 0) +
                           (rainfallChartData.cloud_cover_high[i] || 0)
                         ) / 3;
-                        
+
                         // Scale values to chart height (max 20mm = 100% height)
                         const maxHeight = window.innerWidth < 640 ? 160 : 240; // Responsive height
                         const precipitationHeight = Math.max((precipitation / 20) * maxHeight, precipitation > 0 ? 6 : 2);
                         const rainHeight = Math.max((rain / 20) * maxHeight, rain > 0 ? 4 : 0);
                         const showersHeight = Math.max((showers / 20) * maxHeight, showers > 0 ? 3 : 0);
-                        
+
                         // Weather condition emoji based on weather code
                         const getWeatherEmoji = (code: number) => {
                           if (code <= 1) return '☀️';
@@ -773,18 +770,18 @@ useEffect(() => {
                           if (code <= 82) return '☔';
                           return '⛈️';
                         };
-                        
+
                         return (
                           <div key={i} className="flex flex-col items-center group relative flex-1 max-w-8 sm:max-w-12">
                             {/* Enhanced Tooltip with all API data */}
                             <div className="absolute -top-32 sm:-top-40 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-30 shadow-2xl border border-gray-700 min-w-48 sm:min-w-64">
                               <div className="font-semibold border-b border-gray-600 pb-1 sm:pb-2 mb-1 sm:mb-2 text-center text-xs sm:text-sm">
-                                {getWeatherEmoji(weather_code)} {timePoint.toLocaleDateString('en-US', { 
-                                  month: 'short', 
-                                  day: 'numeric' 
-                                })} at {timePoint.toLocaleTimeString('en-US', { 
-                                  hour: 'numeric', 
-                                  hour12: true 
+                                {getWeatherEmoji(weather_code)} {timePoint.toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric'
+                                })} at {timePoint.toLocaleTimeString('en-US', {
+                                  hour: 'numeric',
+                                  hour12: true
                                 })}
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 sm:gap-x-4 gap-y-1 text-xs">
@@ -824,41 +821,41 @@ useEffect(() => {
                               {/* Tooltip arrow */}
                               <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[4px] sm:border-l-[6px] border-r-[4px] sm:border-r-[6px] border-t-[4px] sm:border-t-[6px] border-transparent border-t-gray-900"></div>
                             </div>
-                            
+
                             {/* Weather icon */}
                             <div className="text-sm sm:text-lg mb-0.5 sm:mb-1 group-hover:scale-125 transition-transform duration-200">
                               {getWeatherEmoji(weather_code)}
                             </div>
-                            
+
                             {/* Stacked precipitation bars */}
                             <div className="relative flex flex-col items-center">
                               {/* Main precipitation bar */}
-                              <div 
+                              <div
                                 className="w-4 sm:w-6 bg-gradient-to-t from-blue-700 via-blue-500 to-blue-300 rounded-t-lg transition-all duration-300 hover:from-blue-800 hover:via-blue-600 hover:to-blue-400 shadow-lg group-hover:w-5 sm:group-hover:w-8 group-hover:shadow-xl"
-                                style={{ 
+                                style={{
                                   height: `${Math.min(precipitationHeight, maxHeight)}px`,
                                   minHeight: '2px'
                                 }}
                                 title={`Precipitation: ${precipitation.toFixed(1)}mm`}
                               ></div>
-                              
+
                               {/* Rain overlay */}
                               {rain > 0 && (
-                                <div 
+                                <div
                                   className="w-3 sm:w-4 bg-gradient-to-t from-cyan-700 via-cyan-500 to-cyan-300 rounded-t-md absolute bottom-0 transition-all duration-300 group-hover:w-4 sm:group-hover:w-6"
-                                  style={{ 
+                                  style={{
                                     height: `${Math.min(rainHeight, maxHeight * 0.8)}px`,
                                     minHeight: '2px'
                                   }}
                                   title={`Rain: ${rain.toFixed(1)}mm`}
                                 ></div>
                               )}
-                              
+
                               {/* Showers overlay */}
                               {showers > 0 && (
-                                <div 
+                                <div
                                   className="w-2 sm:w-3 bg-gradient-to-t from-purple-700 via-purple-500 to-purple-300 rounded-t-sm absolute bottom-0 transition-all duration-300 group-hover:w-3 sm:group-hover:w-4"
-                                  style={{ 
+                                  style={{
                                     height: `${Math.min(showersHeight, maxHeight * 0.6)}px`,
                                     minHeight: '2px'
                                   }}
@@ -866,7 +863,7 @@ useEffect(() => {
                                 ></div>
                               )}
                             </div>
-                            
+
                             {/* Time and temperature labels */}
                             <div className="mt-1 sm:mt-2 text-center">
                               <div className="text-xs font-bold text-gray-800 group-hover:text-blue-800 transition-colors">
@@ -883,7 +880,7 @@ useEffect(() => {
                         );
                       })}
                     </div>
-                    
+
                     {/* X-axis labels */}
                     <div className="absolute bottom-0 left-0 right-0 flex justify-between text-xs text-gray-600 font-medium">
                       <span>Now</span>
@@ -894,7 +891,7 @@ useEffect(() => {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Enhanced Legend */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-white via-blue-50 to-white border-t border-blue-200 py-2 sm:py-3">
                   <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-8 text-xs sm:text-sm">
@@ -930,7 +927,7 @@ useEffect(() => {
         </Card>
       </div>
     </div>
-    
+
     {/* Enhanced Statistics Section */}
     <div className={`grid grid-cols-1 lg:grid-cols-2 gap-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay2}`}>
       {/* Potential Savings Card */}
@@ -946,12 +943,12 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        
+
         <Card className={`overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-green-50 to-emerald-50 ${styles.modernCard}`}>
           <div className="p-8">
             <div className="text-center">
               <div className={`inline-flex items-center justify-center p-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-3xl mb-6 shadow-2xl ${styles.floatAnimation}`}>
-               
+
               </div>
               <div className="mb-4">
                 <h3 className={`text-5xl font-bold mb-2 ${styles.gradientText}`}>14,500</h3>
@@ -962,7 +959,7 @@ useEffect(() => {
                   {t("completeAssessment")}
                 </p>
               </div>
-              
+
               {/* Additional Metrics */}
               <div className="mt-6 grid grid-cols-2 gap-4">
                 <div className={`bg-white bg-opacity-60 rounded-xl p-3 ${styles.statisticCard}`}>
@@ -978,7 +975,7 @@ useEffect(() => {
           </div>
         </Card>
       </div>
-      
+
       {/* Weather Statistics Card */}
       <div>
         <div className="flex items-center justify-between mb-6">
@@ -992,7 +989,7 @@ useEffect(() => {
             </div>
           </div>
         </div>
-        
+
         <Card className={`overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-50 to-cyan-50 ${styles.modernCard}`}>
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
@@ -1002,7 +999,7 @@ useEffect(() => {
                 <span className="text-sm font-semibold text-blue-700">Live Data</span>
               </div>
             </div>
-            
+
             {rainfallChartData && (
               <div className="space-y-4">
                 <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl border border-orange-200 ${styles.statisticCard}`}>
@@ -1017,7 +1014,7 @@ useEffect(() => {
                     <div className="text-xs text-orange-600">24-hour avg</div>
                   </div>
                 </div>
-                
+
                 <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border border-cyan-200 ${styles.statisticCard}`}>
                   <div className="flex items-center space-x-3">
                     <CloudRainIcon className="h-5 w-5 text-cyan-600" />
@@ -1030,7 +1027,7 @@ useEffect(() => {
                     <div className="text-xs text-cyan-600">Expected total</div>
                   </div>
                 </div>
-                
+
                 <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border border-green-200 ${styles.statisticCard}`}>
                   <div className="flex items-center space-x-3">
                     <span className="text-lg">💨</span>
@@ -1043,7 +1040,7 @@ useEffect(() => {
                     <div className="text-xs text-green-600">Relative humidity</div>
                   </div>
                 </div>
-                
+
                 <div className={`flex justify-between items-center p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-200 ${styles.statisticCard}`}>
                   <div className="flex items-center space-x-3">
                     <WindIcon className="h-5 w-5 text-indigo-600" />
@@ -1058,7 +1055,7 @@ useEffect(() => {
                 </div>
               </div>
             )}
-            
+
             {!rainfallChartData && (
               <div className={`flex flex-col items-center justify-center py-8 text-gray-400 ${styles.fadeInUp}`}>
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
