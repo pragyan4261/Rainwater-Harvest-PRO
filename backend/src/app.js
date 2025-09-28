@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import fetch from 'node-fetch';
 import authRoutes from './routes/authRoutes.js';
@@ -8,40 +10,28 @@ import assessmentRoutes from './routes/assessmentRoutes.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import familyRoutes from "./routes/familyRoutes.js";
 import userRoutes from './routes/userRoutes.js';
-
-dotenv.config();
+import session from 'express-session';
+import passport from './config/passport.js';
 
 const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.use(cors({ origin: ['https://rain-wise.netlify.app', 'http://localhost:5173'] }));
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'secret',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("/api/families", familyRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_, res) => res.json({ ok: true }));
-
-const keepAliveUrl = (process.env.SELF_PING_URL || process.env.RENDER_EXTERNAL_URL || '').replace(/\/$/, '');
-const defaultKeepAliveMs = 14 * 60 * 1000;
-const envKeepAliveMs = Number(process.env.KEEP_ALIVE_INTERVAL_MS);
-const keepAliveIntervalMs = Number.isFinite(envKeepAliveMs) && envKeepAliveMs > 0 ? envKeepAliveMs : defaultKeepAliveMs;
-
-async function keepServerAwake() {
-  if (!keepAliveUrl) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`${keepAliveUrl}/api/health`);
-    console.log(`Keep-alive ping succeeded: ${response.status} at ${new Date().toISOString()}`);
-  } catch (error) {
-    console.error(`Keep-alive ping failed: ${error.message}`);
-  }
-}
-
-if (process.env.NODE_ENV === 'production' && keepAliveUrl) {
-  setInterval(keepServerAwake, keepAliveIntervalMs);
-  keepServerAwake();
-  console.log(`Keep-alive ping started for: ${keepAliveUrl} (every ${keepAliveIntervalMs}ms)`);
-}
 
 // Gemini AI Chat Endpoint
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
@@ -62,7 +52,8 @@ app.post('/api/roof-ai-chat', async (req, res) => {
       return res.status(400).json({ error: 'messages array required' });
     }
 
-    const contextBlock = analysis ? `Roof Analysis Context:\nScore: ${analysis.score}\nQuality: ${analysis.quality}\nRunoff Potential: ${analysis.runoffPotential}\nCapture Quality: ${analysis.captureQuality}\nArea Estimate: ${analysis.areaEstimate || 'N/A'} m^2\nObservations: ${(analysis.notes||[]).join('; ')}\nRecommendations: ${(analysis.recommendations||[]).join('; ')}` : 'No analysis context yet.';
+    const contextBlock = analysis ? `Roof Analysis Context:\nScore: ${analysis.score}\nQuality: ${analysis.quality}\nRunoff Potential: ${analysis.runoffPotential}\nCapture Quality: ${analysis.captureQuality}\nArea Estimate: ${analysis.areaEstimate || 'N/A'} m^2\nObservations: ${(analysis.notes||[]).join('; ')}
+Recommendations: ${(analysis.recommendations||[]).join('; ')}` : 'No analysis context yet.';
 
     const systemPrompt = 'You are a helpful assistant specializing in rainwater harvesting rooftop suitability. Use the provided analysis context when answering. If the user asks for actionable improvements, be concise and list them as bullet points. If they ask before an analysis is run, instruct them to upload and analyse an image first. Avoid hallucinating measurements.';
 

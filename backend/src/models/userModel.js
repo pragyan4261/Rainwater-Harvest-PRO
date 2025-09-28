@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  // fullName: { type: String, required: true },
-  firstName: {
+firstName: {
     type: String,
     required: true,
   },
@@ -11,14 +10,17 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   email:    { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  phoneNumber: { type: String },
-  streetAddress: { type: String },
-  city: { type: String },
-  state: { type: String },
-  zipCode: { type: String },
-
+  password: { type: String },
+  phoneNumber: { type: String, default: "" },
+  streetAddress: { type: String, default: "" },
+  city: { type: String, default: "" },
+  state: { type: String, default: "" },
+  zipCode: { type: String, default: "" },
+  googleId: {
+    type: String,
+  },
 });
 
 const User = mongoose.model('User', userSchema);
+
 export default User;

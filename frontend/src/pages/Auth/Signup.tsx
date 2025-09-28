@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { DropletIcon, MailIcon, LockIcon, UserIcon } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import MainLayout from '../../layouts/MainLayout';
 import { useAuth } from '../../context/AuthContext';
 import { apiFetch } from '../../lib/api';
+
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
   const [error, setError] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,46 +38,50 @@ const Signup: React.FC = () => {
       if (err instanceof Error) setError(err.message); else setError('Signup failed');
     }
   };
+  const url = process.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const handleGoogleLogin = () => {
+    window.location.href = `${url}/api/auth/google`;
+  };
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/dashboard');
-  }, [isAuthenticated, navigate]);
+    // Check for a token in the URL query parameters after Google login
+    const token = searchParams.get('token');
+    if (token) {
+      // If a token is found, log the user in and redirect
+      login(token);
+      navigate('/dashboard', { replace: true });
+    } else if (isAuthenticated) {
+      // If already authenticated (from a previous session), redirect
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate, searchParams, login]);
 
-  return <MainLayout hideNavbar>
+  return (
+    <MainLayout hideNavbar>
       <div className="flex flex-col items-center justify-center min-h-screen p-6">
         <div className="w-full max-w-md">
           <div className="flex items-center justify-center mb-8">
             <DropletIcon className="h-10 w-10 text-blue-600 mr-2" />
-            <h1 className="text-2xl font-bold text-gray-800">
-              RainHarvest Pro
-            </h1>
+            <h1 className="text-2xl font-bold text-gray-800">RainHarvest Pro</h1>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-8">
-            <h2 className="text-xl font-semibold mb-6 text-center">
-              Create an Account
-            </h2>
+            <h2 className="text-xl font-semibold mb-6 text-center">Create an Account</h2>
             <form onSubmit={handleSignup}>
-              <Input label="Full Name" name="firstName" placeholder="John" icon={<UserIcon size={18} />} required value={form.firstName} onChange={handleChange} />
-              <Input label="Full Name" name="lastName" placeholder="Doe" icon={<UserIcon size={18} />} required value={form.lastName} onChange={handleChange} />
+              <Input label="First Name" name="firstName" placeholder="John" icon={<UserIcon size={18} />} required value={form.firstName} onChange={handleChange} />
+              <Input label="Last Name" name="lastName" placeholder="Doe" icon={<UserIcon size={18} />} required value={form.lastName} onChange={handleChange} />
               <Input label="Email" name="email" type="email" placeholder="your@email.com" icon={<MailIcon size={18} />} required value={form.email} onChange={handleChange} />
               <Input label="Password" name="password" type="password" placeholder="••••••••" icon={<LockIcon size={18} />} required value={form.password} onChange={handleChange} />
               <div className="flex items-center mb-6">
                 <input id="terms" name="terms" type="checkbox" className="h-4 w-4 text-blue-600 rounded border-gray-300" required />
                 <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
                   I agree to the{' '}
-                  <a href="#" className="text-blue-600 hover:text-blue-500">
-                    Terms of Service
-                  </a>{' '}
+                  <a href="#" className="text-blue-600 hover:text-blue-500">Terms of Service</a>{' '}
                   and{' '}
-                  <a href="#" className="text-blue-600 hover:text-blue-500">
-                    Privacy Policy
-                  </a>
+                  <a href="#" className="text-blue-600 hover:text-blue-500">Privacy Policy</a>
                 </label>
               </div>
               {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
-              <Button variant="primary" fullWidth size="lg">
-                Sign up
-              </Button>
+              <Button variant="primary" fullWidth size="lg">Sign up</Button>
             </form>
             <div className="mt-6">
               <div className="relative">
@@ -83,13 +89,16 @@ const Signup: React.FC = () => {
                   <div className="w-full border-t border-gray-300"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Or continue with
-                  </span>
+                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
                 </div>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <button type="button" aria-label="Continue with Google" className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                <button
+                  type="button"
+                  aria-label="Continue with Google"
+                  onClick={handleGoogleLogin}
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.283 10.356h-8.327v3.451h4.792c-.446 2.193-2.313 3.453-4.792 3.453a5.27 5.27 0 0 1-5.279-5.28 5.27 5.27 0 0 1 5.279-5.279c1.259 0 2.397.447 3.29 1.178l2.6-2.599c-1.584-1.381-3.615-2.233-5.89-2.233a8.908 8.908 0 0 0-8.934 8.934 8.907 8.907 0 0 0 8.934 8.934c4.467 0 8.529-3.249 8.529-8.934 0-.528-.081-1.097-.202-1.625z"></path>
                   </svg>
@@ -104,12 +113,12 @@ const Signup: React.FC = () => {
           </div>
           <p className="mt-6 text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in
-            </Link>
+            <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">Sign in</Link>
           </p>
         </div>
       </div>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default Signup;
