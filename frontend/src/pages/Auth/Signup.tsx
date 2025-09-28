@@ -38,7 +38,7 @@ const Signup: React.FC = () => {
       if (err instanceof Error) setError(err.message); else setError('Signup failed');
     }
   };
-  const url = process.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const url = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   const handleGoogleLogin = () => {
     window.location.href = `${url}/api/auth/google`;
   };

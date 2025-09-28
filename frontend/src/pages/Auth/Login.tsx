@@ -37,8 +37,9 @@ const Login: React.FC = () => {
     }
   };
 
+ const url = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    window.location.href = `${url}/api/auth/google`;
   };
 
   useEffect(() => {
