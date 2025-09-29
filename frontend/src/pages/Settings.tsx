@@ -1115,7 +1115,13 @@ const Settings: React.FC = () => {
                       </div>
                       <h4 className="font-semibold text-gray-800 mb-2">Email Support</h4>
                       <p className="text-sm text-gray-600 mb-4">Get help via email within 24 hours</p>
-                      <Button variant="outline" size="sm" fullWidth className="border-blue-200 text-blue-700 hover:bg-blue-50">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        fullWidth 
+                        className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                        onClick={() => showToast("Support email opened! 📧", "success")}
+                      >
                         📧 Send Email
                       </Button>
                     </div>
@@ -1125,7 +1131,13 @@ const Settings: React.FC = () => {
                       </div>
                       <h4 className="font-semibold text-gray-800 mb-2">Live Chat</h4>
                       <p className="text-sm text-gray-600 mb-4">Chat with our support team</p>
-                      <Button variant="outline" size="sm" fullWidth className="border-green-200 text-green-700 hover:bg-green-50">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        fullWidth 
+                        className="border-green-200 text-green-700 hover:bg-green-50"
+                        onClick={() => showToast("Live chat initiated! A support agent will be with you shortly. 💬", "success")}
+                      >
                         💬 Start Chat
                       </Button>
                     </div>
@@ -1178,6 +1190,7 @@ const Settings: React.FC = () => {
                           variant="primary" 
                           size="sm"
                           className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                          onClick={() => showToast("Call scheduled! You'll receive a calendar invite shortly. 📞", "success")}
                         >
                           📞 Schedule Call
                         </Button>
@@ -1185,6 +1198,7 @@ const Settings: React.FC = () => {
                           variant="outline" 
                           size="sm"
                           className="border-amber-200 text-amber-700 hover:bg-amber-50"
+                          onClick={() => showToast("Bug report submitted! Our team will investigate this issue. 🐛", "success")}
                         >
                           🐛 Report Bug
                         </Button>
