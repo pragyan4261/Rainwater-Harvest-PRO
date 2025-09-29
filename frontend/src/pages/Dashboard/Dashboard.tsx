@@ -7,13 +7,11 @@ import {
   BookOpenIcon,
   MapIcon,
   BarChart2Icon,
-  SparklesIcon,
   TrendingUpIcon,
   ZapIcon,
   ThermometerIcon,
   WindIcon,
   EyeIcon,
-  RefreshCwIcon,
   ArrowUpIcon,
   ActivityIcon,
   CalendarIcon
@@ -210,36 +208,6 @@ const Dashboard: React.FC = () => {
   // Remove automatic weather data fetching on mount
   // Weather data will only be fetched when user explicitly clicks search or location buttons
 
-  const quickActions = [
-    {
-      title: t("quickActions.startAssessment"),
-      icon: <DropletIcon className="h-8 w-8 text-blue-600" />,
-      description: t("quickActions.startAssessmentDesc"),
-      action: () => navigate('/assessment'),
-      color: 'bg-blue-50'
-    },
-    {
-      title: t("quickActions.myReports"),
-      icon: <FileTextIcon className="h-8 w-8 text-green-600" />,
-      description: t("quickActions.myReportsDesc"),
-      action: () => navigate('/reports'),
-      color: 'bg-green-50'
-    },
-    {
-      title: t("quickActions.localRainfall"),
-      icon: <CloudRainIcon className="h-8 w-8 text-cyan-600" />,
-      description: t("quickActions.localRainfallDesc"),
-      action: () => navigate('/roof-analysis'),
-      color: 'bg-cyan-50'
-    },
-    {
-      title: t("quickActions.knowledgeHub"),
-      icon: <BookOpenIcon className="h-8 w-8 text-purple-600" />,
-      description: t("quickActions.knowledgeHubDesc"),
-      action: () => navigate('/knowledge'),
-      color: 'bg-purple-50'
-    }
-  ];
   return <MainLayout>
     {/* Enhanced Header Section with Gradient Background */}
     <div className={`relative mb-8 -mx-6 -mt-6 px-6 pt-8 pb-6 bg-gradient-to-r from-blue-50 via-cyan-50 to-indigo-50 border-b border-blue-100 ${styles.fadeInUp}`}>
@@ -511,34 +479,125 @@ const Dashboard: React.FC = () => {
     </div>
     {/* Enhanced Quick Actions Grid */}
     <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay4}`}>
-      {quickActions.map((action, index) => (
-        <Card
-          key={index}
-          className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`}
-          onClick={action.action}
-        >
-          <div className="p-6 flex items-start space-x-5">
-            <div className={`p-4 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 ${action.color} ${styles.floatAnimation}`}>
-              <div className={`transition-transform duration-300 group-hover:scale-110 ${styles.weatherIcon}`}>
-                {action.icon}
-              </div>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
-                {action.title}
-              </h3>
-              <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
-                {action.description}
-              </p>
-              <div className="mt-4 flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
-                <span className="mr-2">Get Started</span>
-                <ArrowUpIcon className="h-4 w-4 transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-              </div>
+      <Card
+        className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`}
+        onClick={() => {
+          console.log('Button clicked: Start Assessment');
+          console.log('Navigating to: /assessment');
+          navigate('/assessment');
+        }}
+      >
+        <div className="p-6 flex items-start space-x-5">
+          <div className={`p-4 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 bg-blue-50 ${styles.floatAnimation}`}>
+            <div className={`transition-transform duration-300 group-hover:scale-110 ${styles.weatherIcon}`}>
+              <DropletIcon className="h-8 w-8 text-blue-600" />
             </div>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
-        </Card>
-      ))}
+          <div className="flex-1">
+            <h3 className="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+              Start Assessment
+            </h3>
+            <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              Evaluate your rainwater harvesting potential
+            </p>
+            <div className="mt-4 flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
+              <span className="mr-2">Get Started</span>
+              <ArrowUpIcon className="h-4 w-4 transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+      </Card>
+
+      <Card
+        className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`}
+        onClick={() => {
+          console.log('Button clicked: My Reports');
+          console.log('Navigating to: /reports');
+          navigate('/reports');
+        }}
+      >
+        <div className="p-6 flex items-start space-x-5">
+          <div className={`p-4 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 bg-green-50 ${styles.floatAnimation}`}>
+            <div className={`transition-transform duration-300 group-hover:scale-110 ${styles.weatherIcon}`}>
+              <FileTextIcon className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+              My Reports
+            </h3>
+            <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              View your past assessments and reports
+            </p>
+            <div className="mt-4 flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
+              <span className="mr-2">Get Started</span>
+              <ArrowUpIcon className="h-4 w-4 transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+      </Card>
+
+      <Card
+        className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`}
+        onClick={() => {
+          console.log('Button clicked: Roof Analysis');
+          console.log('Navigating to: /roof-analysis');
+          navigate('/roof-analysis');
+        }}
+      >
+        <div className="p-6 flex items-start space-x-5">
+          <div className={`p-4 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 bg-cyan-50 ${styles.floatAnimation}`}>
+            <div className={`transition-transform duration-300 group-hover:scale-110 ${styles.weatherIcon}`}>
+              <CloudRainIcon className="h-8 w-8 text-cyan-600" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+              Roof Analysis
+            </h3>
+            <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              Analyze your roof structure and water capture efficiency
+            </p>
+            <div className="mt-4 flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
+              <span className="mr-2">Get Started</span>
+              <ArrowUpIcon className="h-4 w-4 transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+      </Card>
+
+      <Card
+        className={`group overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 cursor-pointer ${styles.quickActionHover}`}
+        onClick={() => {
+          console.log('Button clicked: Knowledge Hub');
+          console.log('Navigating to: /knowledge');
+          navigate('/knowledge');
+        }}
+      >
+        <div className="p-6 flex items-start space-x-5">
+          <div className={`p-4 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300 bg-purple-50 ${styles.floatAnimation}`}>
+            <div className={`transition-transform duration-300 group-hover:scale-110 ${styles.weatherIcon}`}>
+              <BookOpenIcon className="h-8 w-8 text-purple-600" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-xl mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+              Knowledge Hub
+            </h3>
+            <p className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+              Learn about rainwater harvesting techniques
+            </p>
+            <div className="mt-4 flex items-center text-blue-600 font-medium group-hover:text-blue-700 transition-colors duration-300">
+              <span className="mr-2">Get Started</span>
+              <ArrowUpIcon className="h-4 w-4 transform rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+      </Card>
     </div>
     {/* Enhanced Map Preview Section */}
     <div className={`mb-8 px-2 sm:px-0 ${styles.fadeInUp} ${styles.staggerDelay1}`}>

@@ -99,6 +99,7 @@ i18n.use(initReactI18next).init({
                     community: "Community",
                     settings: "Settings",
                     roofAI: "Roof AI",
+                    logout: "Logout",
                 },
                 reports: {
                 AssessmentReports: "Assessment Reports",
@@ -257,8 +258,8 @@ i18n.use(initReactI18next).init({
                     startAssessmentDesc: "Evaluate your rainwater harvesting potential",
                     myReports: "My Reports",
                     myReportsDesc: "View your past assessments and reports",
-                    localRainfall: "Roof Structure AI Analysis",
-                    localRainfallDesc: "Check roof contour and capture efficiency using AI",
+                    localRainfall: "Roof Analysis",
+                    localRainfallDesc: "Analyze your roof structure and water capture efficiency",
                     knowledgeHub: "Knowledge Hub",
                     knowledgeHubDesc: "Learn about rainwater harvesting techniques",
                 },
@@ -283,7 +284,8 @@ i18n.use(initReactI18next).init({
                     learn: "सीखें",
                     community: "समुदाय",
                     settings: "सेटिंग्स",
-                    roofAI: "रूफ AI"
+                    roofAI: "रूफ AI",
+                    logout: "लॉगआउट",
                 },
                 welcome: "वापसी पर स्वागत है, स्वरूप",
                 subtitle: "आइए आपके वर्षा जल संचयन की क्षमता का पता लगाएं",
@@ -483,7 +485,8 @@ i18n.use(initReactI18next).init({
                     learn: "सीखें",
                     community: "समुदाय",
                     settings: "सेटिंग्स",
-                    roofAI: "रूफ AI"
+                    roofAI: "रूफ AI",
+                    logout: "लॉगआउट",
                 },
                 reports: {
                 AssessmentReports: "अकलन रिपोर्ट",

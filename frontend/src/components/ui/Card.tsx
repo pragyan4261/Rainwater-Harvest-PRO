@@ -11,7 +11,7 @@ const Card: React.FC<CardProps> = ({
   onClick,
   hoverable = false
 }) => {
-  return <div className={`bg-white rounded-xl shadow-sm p-4 ${hoverable ? 'hover:shadow-md transition-shadow duration-200 cursor-pointer' : ''} ${className}`} onClick={onClick}>
+  return <div className={`relative bg-white rounded-xl shadow-sm p-4 ${hoverable ? 'hover:shadow-md transition-shadow duration-200 cursor-pointer' : ''} ${className}`} onClick={onClick}>
       {children}
     </div>;
 };
