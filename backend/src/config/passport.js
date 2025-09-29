@@ -2,10 +2,20 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from '../models/userModel.js';
 import dotenv from 'dotenv';
-dotenv.config({ path: 'e:/Rainwater-Harvest-PRO/backend/.env' });
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const backendURL = process.env.BACKEND_URL || 'http://localhost:5000';
+
+// Debug: Check if environment variables are loaded
+console.log('GOOGLE_CLIENT_ID loaded:', !!process.env.GOOGLE_CLIENT_ID);
+console.log('GOOGLE_CLIENT_SECRET loaded:', !!process.env.GOOGLE_CLIENT_SECRET);
+
 passport.use(
   new GoogleStrategy(
     {
