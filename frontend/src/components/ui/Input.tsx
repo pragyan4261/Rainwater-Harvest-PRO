@@ -9,6 +9,7 @@ interface InputProps {
   error?: string;
   icon?: React.ReactNode;
   required?: boolean;
+  disabled?: boolean;
 }
 const Input: React.FC<InputProps> = ({
   label,
@@ -19,7 +20,8 @@ const Input: React.FC<InputProps> = ({
   onChange,
   error,
   icon,
-  required = false
+  required = false,
+  disabled = false
 }) => {
   return <div className="mb-4">
       <label className="block text-gray-700 text-sm font-medium mb-1">
@@ -29,9 +31,19 @@ const Input: React.FC<InputProps> = ({
         {icon && <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
             {icon}
           </div>}
-        <input type={type} name={name} placeholder={placeholder} value={value} onChange={onChange} className={`w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} 
+        <input 
+          type={type} 
+          name={name} 
+          placeholder={placeholder} 
+          value={value} 
+          onChange={onChange} 
+          disabled={disabled}
+          className={`w-full rounded-lg border ${error ? 'border-red-500' : 'border-gray-300'} 
             py-2 ${icon ? 'pl-10' : 'pl-3'} pr-3 focus:outline-none focus:ring-2 
-            focus:ring-blue-500 focus:border-transparent transition-all`} />
+            focus:ring-blue-500 focus:border-transparent transition-all ${
+            disabled ? 'bg-gray-100 cursor-not-allowed opacity-60' : 'bg-white'
+          }`} 
+        />
       </div>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>;

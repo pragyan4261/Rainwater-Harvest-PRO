@@ -7,6 +7,7 @@ interface ButtonProps {
   icon?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 }
 const Button: React.FC<ButtonProps> = ({
   children,
@@ -15,7 +16,8 @@ const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   icon,
   onClick,
-  disabled = false
+  disabled = false,
+  className = ''
 }) => {
   const baseStyles = 'rounded-lg font-medium transition-all duration-200 flex items-center justify-center';
   const variantStyles = {
@@ -29,7 +31,7 @@ const Button: React.FC<ButtonProps> = ({
     lg: 'text-lg py-2.5 px-5'
   };
   const widthStyle = fullWidth ? 'w-full' : '';
-  return <button className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyle} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={onClick} disabled={disabled}>
+  return <button className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyle} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`} onClick={onClick} disabled={disabled}>
       {icon && <span className="mr-2">{icon}</span>}
       {children}
     </button>;
