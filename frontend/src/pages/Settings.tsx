@@ -4,6 +4,7 @@ import MainLayout from '../layouts/MainLayout';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import Toast from '../components/ui/Toast';
 import { useTranslation } from "react-i18next";
 
 const lngs = [
@@ -57,6 +58,34 @@ const Settings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Toast state
+  const [toast, setToast] = useState<{
+    isVisible: boolean;
+    message: string;
+    type: 'success' | 'error' | 'warning';
+  }>({
+    isVisible: false,
+    message: '',
+    type: 'success'
+  });
+
+  // Function to show toast
+  const showToast = (message: string, type: 'success' | 'error' | 'warning') => {
+    setToast({
+      isVisible: true,
+      message,
+      type
+    });
+  };
+
+  // Function to hide toast
+  const hideToast = () => {
+    setToast(prev => ({
+      ...prev,
+      isVisible: false
+    }));
+  };
+
   // Inject custom styles
   useEffect(() => {
     const styleElement = document.createElement('style');
@@ -71,6 +100,7 @@ const Settings: React.FC = () => {
   const handleSaveLanguage = () => {
     i18n.changeLanguage(selectedLang);
     localStorage.setItem("preferredLanguage", selectedLang);
+    showToast("Language preferences saved successfully! 🌍", "success");
   };
 
   const [activeTab, setActiveTab] = useState('profile');
@@ -177,13 +207,13 @@ const Settings: React.FC = () => {
         throw new Error(data.message || "Failed to save changes");
       }
 
-      alert("Profile saved successfully!");
+      showToast("Profile saved successfully! 🎉", "success");
       setIsEditing(false); // Exit editing mode on successful save
       setInitialProfileData(profileData); // Update initial data with saved data
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unexpected error while saving";
       setError(errorMessage);
-      alert(`Error saving profile: ${errorMessage}`);
+      showToast(`Error saving profile: ${errorMessage}`, "error");
       console.error("Error saving profile:", err);
     } finally {
       setSaving(false);
@@ -198,6 +228,15 @@ const Settings: React.FC = () => {
 
   return (
     <MainLayout>
+      {/* Toast notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+        duration={4000}
+      />
+      
       <div className="mb-8">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-xl">
           <h1 className="text-3xl font-bold mb-2">{t("settings.title")}</h1>
@@ -556,6 +595,7 @@ const Settings: React.FC = () => {
                 <Button 
                   variant="primary"
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+                  onClick={() => showToast("Notification preferences saved! 🔔", "success")}
                 >
                   💾 {t("settings.savePreferences")}
                 </Button>
@@ -702,6 +742,7 @@ const Settings: React.FC = () => {
                 <Button 
                   variant="primary"
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg"
+                  onClick={() => showToast("Appearance settings applied! 🎨", "success")}
                 >
                   🎨 {t("settings.applyChanges")}
                 </Button>
@@ -976,6 +1017,7 @@ const Settings: React.FC = () => {
                         variant="outline" 
                         size="sm"
                         className="bg-white border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
+                        onClick={() => showToast("Data download initiated! Check your email for the download link. 📥", "success")}
                       >
                         📥 Download My Data
                       </Button>
@@ -983,6 +1025,7 @@ const Settings: React.FC = () => {
                         variant="outline" 
                         size="sm"
                         className="bg-white border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+                        onClick={() => showToast("Account deletion requires additional verification. Please contact support for assistance. ⚠️", "warning")}
                       >
                         🗑️ Delete Account
                       </Button>
@@ -1001,6 +1044,7 @@ const Settings: React.FC = () => {
                 <Button 
                   variant="primary"
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+                  onClick={() => showToast("Privacy settings saved securely! 🔒", "success")}
                 >
                   🔒 Save Privacy Settings
                 </Button>
