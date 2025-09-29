@@ -62,7 +62,7 @@ const Signup: React.FC = () => {
         <div className="w-full max-w-md">
           <div className="flex items-center justify-center mb-8">
             <DropletIcon className="h-10 w-10 text-blue-600 mr-2" />
-            <h1 className="text-2xl font-bold text-gray-800">RainHarvest Pro</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Rainwise</h1>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-8">
             <h2 className="text-xl font-semibold mb-6 text-center">Create an Account</h2>
