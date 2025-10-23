@@ -5,7 +5,7 @@
 # Proxy API requests to backend
 [[redirects]]
   from = "/api/*"
-  to = "https://rainwater-harvest-pro-2.onrender.com/api/:splat"
+  to = "https://rainwater-harvest-pro-1-es6y.onrender.com/api/:splat"
   status = 200
   force = true
   headers = { X-From = "Netlify" }   
